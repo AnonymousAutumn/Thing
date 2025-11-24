@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	GiftUI - Main gift system UI controller
+
+	This module manages the client-side gift system, handling:
+	- Gift notifications and badge display
+	- Sending gifts to other players with username validation
+	- Displaying received gifts with timestamps
+	- Background tasks for data refresh and time updates
+
+	Returns: Nothing (initializes and runs automatically)
+
+	Usage: This script runs automatically when parented to the player's UI.
+	The UI initializes on startup and manages all gift-related interactions.
+]]
+
 --------------
 -- Services --
 --------------
@@ -24,57 +39,60 @@ type GiftUIState = {
 -- Constants --
 ---------------
 local TAG = "[GiftUI]"
+local WAIT_TIMEOUT = 10
 
 ----------------
 -- References --
 ----------------
 local localPlayer = Players.LocalPlayer
-local localPlayerGui = localPlayer:WaitForChild("PlayerGui")
+assert(localPlayer, TAG .. " LocalPlayer not found")
 
-local network: Folder = ReplicatedStorage:WaitForChild("Network") :: Folder
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local remoteFunctions = remotes:WaitForChild("Functions")
+local localPlayerGui = assert(localPlayer:WaitForChild("PlayerGui", WAIT_TIMEOUT), TAG .. " PlayerGui not found")
 
-local toggleGiftUIEvent = remoteEvents:WaitForChild("ToggleGiftUI")
-local clearGiftDataEvent = remoteEvents:WaitForChild("ClearGifts")
-local requestGiftDataFunction = remoteFunctions:WaitForChild("RequestGifts")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", WAIT_TIMEOUT), TAG .. " Network folder not found") :: Folder
+local remotes = assert(network:WaitForChild("Remotes", WAIT_TIMEOUT), TAG .. " Remotes folder not found")
+local remoteEvents = assert(remotes:WaitForChild("Events", WAIT_TIMEOUT), TAG .. " Events folder not found")
+local remoteFunctions = assert(remotes:WaitForChild("Functions", WAIT_TIMEOUT), TAG .. " Functions folder not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local toggleGiftUIEvent = assert(remoteEvents:WaitForChild("ToggleGiftUI", WAIT_TIMEOUT), TAG .. " ToggleGiftUI event not found")
+local clearGiftDataEvent = assert(remoteEvents:WaitForChild("ClearGifts", WAIT_TIMEOUT), TAG .. " ClearGifts event not found")
+local requestGiftDataFunction = assert(remoteFunctions:WaitForChild("RequestGifts", WAIT_TIMEOUT), TAG .. " RequestGifts function not found")
+
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 -- Submodules (existing)
-local TimeFormatter = require(script:WaitForChild("TimeFormatter"))
-local UIRenderer = require(script:WaitForChild("UIRenderer"))
-local ValidationHandler = require(script:WaitForChild("ValidationHandler"))
+local TimeFormatter = require(assert(script:WaitForChild("TimeFormatter", WAIT_TIMEOUT), TAG .. " TimeFormatter not found"))
+local UIRenderer = require(assert(script:WaitForChild("UIRenderer", WAIT_TIMEOUT), TAG .. " UIRenderer not found"))
+local ValidationHandler = require(assert(script:WaitForChild("ValidationHandler", WAIT_TIMEOUT), TAG .. " ValidationHandler not found"))
 
 -- Submodules (new)
-local ServerComms = require(script.ServerComms)
-local StateManager = require(script.StateManager)
-local ErrorDisplay = require(script.ErrorDisplay)
-local BackgroundTasks = require(script.BackgroundTasks)
+local ServerComms = require(assert(script:WaitForChild("ServerComms", WAIT_TIMEOUT), TAG .. " ServerComms not found"))
+local StateManager = require(assert(script:WaitForChild("StateManager", WAIT_TIMEOUT), TAG .. " StateManager not found"))
+local ErrorDisplay = require(assert(script:WaitForChild("ErrorDisplay", WAIT_TIMEOUT), TAG .. " ErrorDisplay not found"))
+local BackgroundTasks = require(assert(script:WaitForChild("BackgroundTasks", WAIT_TIMEOUT), TAG .. " BackgroundTasks not found"))
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs: Folder = instances:WaitForChild("GuiPrefabs") :: Folder
-local giftReceivedPrefab: CanvasGroup = guiPrefabs:WaitForChild("GiftReceivedPrefab") :: CanvasGroup
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", WAIT_TIMEOUT), TAG .. " Instances folder not found")
+local guiPrefabs: Folder = assert(instances:WaitForChild("GuiPrefabs", WAIT_TIMEOUT), TAG .. " GuiPrefabs folder not found") :: Folder
+local giftReceivedPrefab: CanvasGroup = assert(guiPrefabs:WaitForChild("GiftReceivedPrefab", WAIT_TIMEOUT), TAG .. " GiftReceivedPrefab not found") :: CanvasGroup
 
-local topbarUserInterface = localPlayerGui:WaitForChild("TopbarUI")
-local topbarMainFrame = topbarUserInterface:WaitForChild("MainFrame")
-local topbarContentHolder = topbarMainFrame:WaitForChild("Holder")
-local giftNotificationButton = topbarContentHolder:WaitForChild("GiftButton") :: GuiButton
-local giftCountNotificationLabel = giftNotificationButton:WaitForChild("CountLabel") :: TextLabel
+local topbarUserInterface = assert(localPlayerGui:WaitForChild("TopbarUI", WAIT_TIMEOUT), TAG .. " TopbarUI not found")
+local topbarMainFrame = assert(topbarUserInterface:WaitForChild("MainFrame", WAIT_TIMEOUT), TAG .. " TopbarUI MainFrame not found")
+local topbarContentHolder = assert(topbarMainFrame:WaitForChild("Holder", WAIT_TIMEOUT), TAG .. " TopbarUI Holder not found")
+local giftNotificationButton = assert(topbarContentHolder:WaitForChild("GiftButton", WAIT_TIMEOUT), TAG .. " GiftButton not found") :: GuiButton
+local giftCountNotificationLabel = assert(giftNotificationButton:WaitForChild("CountLabel", WAIT_TIMEOUT), TAG .. " CountLabel not found") :: TextLabel
 
 local giftInterfaceScript = script.Parent
-local giftDisplayFrame = giftInterfaceScript:WaitForChild("GiftFrame") :: Frame
-local giftEntriesScrollingFrame = giftDisplayFrame:WaitForChild("ScrollingFrame") :: ScrollingFrame
-local giftInterfaceCloseButton = giftDisplayFrame:WaitForChild("CloseButton") :: GuiButton
+local giftDisplayFrame = assert(giftInterfaceScript:WaitForChild("GiftFrame", WAIT_TIMEOUT), TAG .. " GiftFrame not found") :: Frame
+local giftEntriesScrollingFrame = assert(giftDisplayFrame:WaitForChild("ScrollingFrame", WAIT_TIMEOUT), TAG .. " GiftFrame ScrollingFrame not found") :: ScrollingFrame
+local giftInterfaceCloseButton = assert(giftDisplayFrame:WaitForChild("CloseButton", WAIT_TIMEOUT), TAG .. " CloseButton not found") :: GuiButton
 
-local sendGiftInterfaceFrame = giftInterfaceScript:WaitForChild("SendGiftFrame") :: Frame
-local usernameInputFrame = sendGiftInterfaceFrame:WaitForChild("InputFrame") :: Frame
-local errorMessageDisplayFrame = usernameInputFrame:WaitForChild("InvalidFrame") :: Frame
-local errorMessageLabel = errorMessageDisplayFrame:WaitForChild("TextLabel") :: TextLabel
-local usernameInputTextBox = usernameInputFrame:WaitForChild("TextBox") :: TextBox
-local giftSendConfirmationButton = sendGiftInterfaceFrame:WaitForChild("ConfirmButton") :: GuiButton
+local sendGiftInterfaceFrame = assert(giftInterfaceScript:WaitForChild("SendGiftFrame", WAIT_TIMEOUT), TAG .. " SendGiftFrame not found") :: Frame
+local usernameInputFrame = assert(sendGiftInterfaceFrame:WaitForChild("InputFrame", WAIT_TIMEOUT), TAG .. " InputFrame not found") :: Frame
+local errorMessageDisplayFrame = assert(usernameInputFrame:WaitForChild("InvalidFrame", WAIT_TIMEOUT), TAG .. " InvalidFrame not found") :: Frame
+local errorMessageLabel = assert(errorMessageDisplayFrame:WaitForChild("TextLabel", WAIT_TIMEOUT), TAG .. " InvalidFrame TextLabel not found") :: TextLabel
+local usernameInputTextBox = assert(usernameInputFrame:WaitForChild("TextBox", WAIT_TIMEOUT), TAG .. " TextBox not found") :: TextBox
+local giftSendConfirmationButton = assert(sendGiftInterfaceFrame:WaitForChild("ConfirmButton", WAIT_TIMEOUT), TAG .. " ConfirmButton not found") :: GuiButton
 
 ---------------
 -- Variables --

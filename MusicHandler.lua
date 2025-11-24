@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Music Player Handler
+
+	Main controller for the in-game music player interface. Manages track playback,
+	volume control, UI events, and scrolling track name animations. Coordinates
+	between TrackManager, VolumeControl, ScrollAnimator, and UIEventHandler submodules.
+
+	Returns: nil (auto-initializes on require)
+
+	Usage:
+		Simply require this module in a LocalScript parented to the music player GUI.
+		The system will automatically initialize the player and start playing music.
+]]
+
 --------------
 -- Services --
 --------------
@@ -48,8 +62,8 @@ type PlaybackState = {
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 local MusicLibrary = require(Configuration.MusicLibrary)
@@ -62,15 +76,15 @@ local UIEventHandler = require(script.UIEventHandler)
 
 local localPlayer = Players.LocalPlayer
 
-local musicPlayerInterface = script.Parent:WaitForChild("MusicFrame")
-local nextTrackButton = musicPlayerInterface:WaitForChild("NextButton") :: GuiButton
-local previousTrackButton = musicPlayerInterface:WaitForChild("PreviousButton") :: GuiButton
-local trackFrame = musicPlayerInterface:WaitForChild("TrackFrame") :: Frame
-local trackNameLabel = trackFrame:WaitForChild("TextLabel") :: TextLabel
-local sliderFrame = musicPlayerInterface:WaitForChild("SliderFrame") :: Frame
-local volumeFill = sliderFrame:WaitForChild("Fill") :: Frame
-local volumeDragHandle = sliderFrame:WaitForChild("DragButton") :: GuiObject
-local volumeDragDetector = sliderFrame:WaitForChild("UIDragDetector") -- UIDragDetector
+local musicPlayerInterface = assert(script.Parent:WaitForChild("MusicFrame", 10), "Failed to find MusicFrame in parent")
+local nextTrackButton = assert(musicPlayerInterface:WaitForChild("NextButton", 10), "Failed to find NextButton in MusicFrame") :: GuiButton
+local previousTrackButton = assert(musicPlayerInterface:WaitForChild("PreviousButton", 10), "Failed to find PreviousButton in MusicFrame") :: GuiButton
+local trackFrame = assert(musicPlayerInterface:WaitForChild("TrackFrame", 10), "Failed to find TrackFrame in MusicFrame") :: Frame
+local trackNameLabel = assert(trackFrame:WaitForChild("TextLabel", 10), "Failed to find TextLabel in TrackFrame") :: TextLabel
+local sliderFrame = assert(musicPlayerInterface:WaitForChild("SliderFrame", 10), "Failed to find SliderFrame in MusicFrame") :: Frame
+local volumeFill = assert(sliderFrame:WaitForChild("Fill", 10), "Failed to find Fill in SliderFrame") :: Frame
+local volumeDragHandle = assert(sliderFrame:WaitForChild("DragButton", 10), "Failed to find DragButton in SliderFrame") :: GuiObject
+local volumeDragDetector = assert(sliderFrame:WaitForChild("UIDragDetector", 10), "Failed to find UIDragDetector in SliderFrame") -- UIDragDetector
 
 ---------------
 -- Variables --
@@ -150,7 +164,7 @@ function playTrackAtIndex(targetIndex: number): ()
 		return
 	end
 
-	-- Sound is valid – proceed
+	-- Sound is valid ï¿½ proceed
 	local newSound = TrackManager.createSound(
 		trackData,
 		musicPlayerInterface,

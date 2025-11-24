@@ -1,5 +1,23 @@
 --!strict
 
+--[[
+	GameUI
+
+	Main client-side UI controller for Connect4 game status display.
+	Manages status animations, timeouts, player exits, and cleanup lifecycle.
+
+	Returns: Module initializes automatically and manages:
+		- Game status interface with animations
+		- Turn timeout countdown display
+		- Exit button handling
+		- Camera reset on cleanup
+		- Resource tracking and cleanup on player leave
+
+	Usage:
+		Placed in ScreenGui, automatically initializes when player joins game.
+		Listens for RemoteEvents to update UI state.
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,14 +27,14 @@ local Players = game:GetService("Players")
 ----------------
 -- References --
 ----------------
-local network = ReplicatedStorage:WaitForChild("Network")
-local bindables = network:WaitForChild("Bindables")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local connect4Bindables = bindables:WaitForChild("Connect4")
-local connect4Remotes = remotes:WaitForChild("Connect4")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Bindables folder not found in Network")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found in Network")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found in Remotes")
+local connect4Bindables = assert(bindables:WaitForChild("Connect4", 10), "Connect4 folder not found in Bindables")
+local connect4Remotes = assert(remotes:WaitForChild("Connect4", 10), "Connect4 folder not found in Remotes")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local InputCategorizer = require(Modules.Utilities.InputCategorizer)
 
 -- Submodules
@@ -25,10 +43,10 @@ local StatusAnimator = require(script.StatusAnimator)
 local TimeoutManager = require(script.TimeoutManager)
 local UpdateCoordinator = require(script.UpdateCoordinator)
 
-local gameStatusInterface = script.Parent:WaitForChild("MainFrame") :: Frame
-local statusHolder = gameStatusInterface:WaitForChild("BarFrame") :: Frame
-local statusLabel = statusHolder:WaitForChild("TextLabel") :: TextLabel
-local exitButton = gameStatusInterface:WaitForChild("ExitButton") :: GuiButton
+local gameStatusInterface = assert(script.Parent:WaitForChild("MainFrame", 10), "MainFrame not found in GameUI parent") :: Frame
+local statusHolder = assert(gameStatusInterface:WaitForChild("BarFrame", 10), "BarFrame not found in MainFrame") :: Frame
+local statusLabel = assert(statusHolder:WaitForChild("TextLabel", 10), "TextLabel not found in BarFrame") :: TextLabel
+local exitButton = assert(gameStatusInterface:WaitForChild("ExitButton", 10), "ExitButton not found in MainFrame") :: GuiButton
 
 local localPlayer = Players.LocalPlayer
 local isMobileDevice = InputCategorizer.getLastInputCategory() == "Touch"

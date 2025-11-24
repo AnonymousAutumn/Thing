@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	TipJar Tool Script
+
+	Manages tip jar tool interactions and UI toggling.
+	Handles tool equip/unequip, proximity prompt triggers, and player visibility.
+
+	Returns: Nothing (tool script)
+
+	Usage: Attached to a Tool instance in StarterPack or player backpack
+]]
+
 --------------
 -- Services --
 --------------
@@ -34,18 +45,18 @@ type UIViewingData = {
 -- References --
 ----------------
 
-local network : Folder = ReplicatedStorage:WaitForChild("Network")
-local bindables = network:WaitForChild("Bindables") :: Folder
-local bindableEvents = bindables:WaitForChild("Events")
-local toggleUIEvent = bindableEvents:WaitForChild("ToggleUI") :: RemoteEvent
+local network : Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network") :: Folder
+local bindables = assert(network:WaitForChild("Bindables", 10), "Failed to find Bindables") :: Folder
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Failed to find bindable Events")
+local toggleUIEvent = assert(bindableEvents:WaitForChild("ToggleUI", 10), "Failed to find ToggleUI") :: RemoteEvent
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
 
 local interactableToolInstance = script.Parent :: Tool
-local toolPhysicalHandle = interactableToolInstance:WaitForChild("Handle") :: BasePart
-local toolInteractionProximityPrompt = toolPhysicalHandle:WaitForChild("ProximityPrompt") :: ProximityPrompt
+local toolPhysicalHandle = assert(interactableToolInstance:WaitForChild("Handle", 10), "Failed to find Handle") :: BasePart
+local toolInteractionProximityPrompt = assert(toolPhysicalHandle:WaitForChild("ProximityPrompt", 10), "Failed to find ProximityPrompt") :: ProximityPrompt
 
 ---------------
 -- Variables --

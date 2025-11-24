@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	PassCache - Cache Lifecycle Manager
+
+	Manages the lifecycle of cache entries including periodic cleanup of stale
+	entries, cleanup thread management, and shutdown procedures. Handles both
+	player-keyed and user ID-keyed cache entries.
+
+	Returns: CacheLifecycle (module table with lifecycle functions)
+
+	Usage:
+		CacheLifecycle.initialize({ checkStaleFunc, isValidPlayerFunc, logFunc })
+		CacheLifecycle.startCleanupLoop(playerCache, tempCache, config)
+		CacheLifecycle.stopCleanupLoop()
+		CacheLifecycle.setShuttingDown(true)
+]]
+
 local CacheLifecycle = {}
 
 -----------
@@ -38,6 +54,11 @@ function CacheLifecycle.initialize(config: {
 	isValidPlayerFunc: (Player) -> boolean,
 	logFunc: (string, ...any) -> (),
 	}): ()
+	assert(config, "config cannot be nil")
+	assert(config.checkStaleFunc, "config.checkStaleFunc cannot be nil")
+	assert(config.isValidPlayerFunc, "config.isValidPlayerFunc cannot be nil")
+	assert(config.logFunc, "config.logFunc cannot be nil")
+
 	state = {
 		cleanupThread = nil,
 		isShuttingDown = false,

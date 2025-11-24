@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	Notification UI - Animator
+
+	Handles all animation logic for notification frames including entry animations
+	(expansion, fade-in, special effects for warnings/errors), exit animations
+	(collapse, fade-out), and repositioning animations for the notification stack.
+
+	Returns: NotificationAnimator (module table with animation functions)
+
+	Usage:
+		NotificationAnimator.animateEntry(config)
+		NotificationAnimator.animateExit(frame, textLabel)
+		NotificationAnimator.animateReposition(frame, newPosition)
+		NotificationAnimator.calculatePosition(index, totalCount)
+]]
+
 --------------
 -- Services --
 --------------

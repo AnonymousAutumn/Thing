@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	TransactionHandler Module
+
+	Server-side transaction and donation management system.
+	Coordinates gift persistence, statistics tracking, and purchase flows.
+
+	Returns: Nothing (server-side initialization script)
+
+	Usage: Runs automatically on server, handles all gamepass purchases and donations
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,24 +22,24 @@ local RunService = game:GetService("RunService")
 -- References --
 ----------------
 
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local remoteFunctions = remotes:WaitForChild("Functions")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events")
+local remoteFunctions = assert(remotes:WaitForChild("Functions", 10), "Failed to find Functions")
 
-local giftRequestFunction = remoteFunctions:WaitForChild("RequestGifts")
-local giftClearanceEvent = remoteEvents:WaitForChild("ClearGifts")
+local giftRequestFunction = assert(remoteFunctions:WaitForChild("RequestGifts", 10), "Failed to find RequestGifts")
+local giftClearanceEvent = assert(remoteEvents:WaitForChild("ClearGifts", 10), "Failed to find ClearGifts")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local UsernameCache = require(Modules.Caches.UsernameCache)
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
-local EnhancedValidation = require(Modules.Utilities.EnhancedValidation)
-local RateLimiter = require(Modules.Utilities.RateLimiter)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local UsernameCache = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("UsernameCache", 10), "Failed to find UsernameCache"))
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
+local EnhancedValidation = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("EnhancedValidation", 10), "Failed to find EnhancedValidation"))
+local RateLimiter = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("RateLimiter", 10), "Failed to find RateLimiter"))
 
-local GiftPersistence = require(script:WaitForChild("GiftPersistence"))
-local DonationMessaging = require(script:WaitForChild("DonationMessaging"))
-local DonationStatistics = require(script:WaitForChild("DonationStatistics"))
-local PurchaseFlow = require(script:WaitForChild("PurchaseFlow"))
+local GiftPersistence = require(assert(script:WaitForChild("GiftPersistence", 10), "Failed to find GiftPersistence"))
+local DonationMessaging = require(assert(script:WaitForChild("DonationMessaging", 10), "Failed to find DonationMessaging"))
+local DonationStatistics = require(assert(script:WaitForChild("DonationStatistics", 10), "Failed to find DonationStatistics"))
+local PurchaseFlow = require(assert(script:WaitForChild("PurchaseFlow", 10), "Failed to find PurchaseFlow"))
 
 ---------------
 -- Constants --

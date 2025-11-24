@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	GradientProcessor Module
+
+	Processes UIGradient instances to apply gradient effects to text.
+	Returns a table with processGradientText and isValidUIGradient methods.
+
+	Usage:
+		local result = GradientProcessor.processGradientText(gradient, "Text", stripFunc)
+]]
+
 ---------------
 -- Constants --
 ---------------

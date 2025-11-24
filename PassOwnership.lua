@@ -1,18 +1,34 @@
+--[[
+	Pass Ownership Handler
+
+	Handles special pass ownership functionality including freecam GUI replacement
+	and car keys tool distribution. Listens to player attributes for pass ownership
+	changes and grants appropriate items.
+
+	Returns: nil (auto-initializes on require)
+
+	Usage:
+		Require this module in a LocalScript. It will automatically detect pass
+		ownership and grant the appropriate items (freecam GUI, car keys tool).
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local PlayerGui = assert(LocalPlayer:WaitForChild("PlayerGui", 10), "Failed to find PlayerGui")
 
 -- Reference to your GUI prefab in ReplicatedStorage
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local PurchasesWrapper = require(modules.Wrappers.Purchases)
 local gameConfig = require(configuration.GameConfig)
 
-local instances = ReplicatedStorage:WaitForChild("Instances")
-local carKeys = instances.Tools.CarKeys
-local customGui = instances.GuiPrefabs.CustomFreecam
+local instances = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Failed to find Instances in ReplicatedStorage")
+local tools = assert(instances:WaitForChild("Tools", 10), "Failed to find Tools in Instances")
+local carKeys = assert(tools:WaitForChild("CarKeys", 10), "Failed to find CarKeys in Tools")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "Failed to find GuiPrefabs in Instances")
+local customGui = assert(guiPrefabs:WaitForChild("CustomFreecam", 10), "Failed to find CustomFreecam in GuiPrefabs")
 
 local ownsFreecam = false
 local ownsCarKeys = false

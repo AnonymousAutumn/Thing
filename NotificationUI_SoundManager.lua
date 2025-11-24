@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	Notification UI - Sound Manager
+
+	Manages sound playback for notification events. Maps notification types
+	to appropriate feedback sounds and handles safe sound playback with
+	error handling.
+
+	Returns: SoundManager (module table with sound functions)
+
+	Usage:
+		SoundManager.playForType("Success")
+		SoundManager.playSuccess()
+		SoundManager.playError()
+]]
+
 --------------
 -- Services --
 --------------
@@ -14,7 +29,7 @@ local SOUND_NAMES = {
 	Error = "Error",
 }
 
-local feedbackSounds: SoundGroup = SoundService:WaitForChild("Feedback")
+local feedbackSounds: SoundGroup = assert(SoundService:WaitForChild("Feedback", 10), "Failed to find Feedback SoundGroup in SoundService")
 
 -----------
 -- Module --

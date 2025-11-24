@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	BoardState Module
+
+	Manages Connect4 board state tracking and token placement.
+	Returns a table with .new() constructor for creating board state instances.
+
+	Usage:
+		local board = BoardState.new(5, 8)
+		board:placeToken(column, row, teamIndex, tokenPart)
+]]
+
 -----------
 -- Types --
 -----------
@@ -27,6 +38,9 @@ BoardState.__index = BoardState
 	@return Board
 ]]
 function BoardState.new(rows: number, columns: number): Board
+	assert(type(rows) == "number" and rows > 0, "rows must be a positive number")
+	assert(type(columns) == "number" and columns > 0, "columns must be a positive number")
+
 	local self = setmetatable({}, BoardState) :: any
 
 	self.rows = rows

@@ -1,5 +1,25 @@
 --!strict
 
+--[[
+	PassUIHandler_ComponentBuilder - UI component reference builder for donation interface
+
+	What it does:
+	- Validates and constructs UI component references from ScreenGui
+	- Ensures all required UI elements exist before returning component table
+	- Provides type-safe access to UI elements
+
+	Returns: Module table with functions:
+	- buildUIComponents(donationInterface: ScreenGui): UIComponents? - Builds component table
+	- validateUIComponents(components: any): boolean - Validates component structure
+
+	Usage:
+	local ComponentBuilder = require(script.ComponentBuilder)
+	local components = ComponentBuilder.buildUIComponents(playerGui.PassUI)
+	if components then
+		components.MainFrame.Visible = true
+	end
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,7 +29,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local PassUIUtilities = require(Modules.Utilities.PassUIUtilities)
 
 -----------

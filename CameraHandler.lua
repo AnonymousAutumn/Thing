@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	CameraHandler Module
+
+	Manages camera transitions for Connect4 gameplay.
+	Returns nothing - executes automatically when required.
+
+	Usage:
+		Automatically connects to UpdateCamera remote event and handles camera transitions.
+]]
+
 --------------
 -- Services --
 --------------
@@ -14,12 +24,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local network : Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local connect4RemoteEvents = remotes:WaitForChild("Connect4")
-local updateCameraEvent = connect4RemoteEvents:WaitForChild("UpdateCamera")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found in Network")
+local connect4RemoteEvents = assert(remotes:WaitForChild("Connect4", 10), "Connect4 folder not found in Remotes")
+local updateCameraEvent = assert(connect4RemoteEvents:WaitForChild("UpdateCamera", 10), "UpdateCamera event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 local TweenHelper = require(Modules.Utilities.TweenHelper)
 
@@ -64,6 +74,8 @@ local function restoreOriginalCamera(): ()
 end
 
 local function focusOnGameBoard(boardCameraFrame: CFrame): ()
+	assert(typeof(boardCameraFrame) == "CFrame", "boardCameraFrame must be a CFrame")
+
 	-- Store original camera state on first focus
 	if not savedCameraType then
 		savedCameraType = camera.CameraType

@@ -1,5 +1,24 @@
 --!strict
 
+--[[
+	PassUIUtilities - Common UI utility functions for gamepass interface
+
+	What it does:
+	- Provides safe WaitForChild with timeout and error handling
+	- Clears children of specific class from containers
+	- Resets scroll frames (clear contents, reset position)
+
+	Returns: Module table with functions:
+	- safeWaitForChild(parent, childName, timeout?) - Safe WaitForChild with timeout
+	- clearChildrenOfClass(container, className) - Removes all children of class
+	- resetGamepassScrollFrame(scrollFrame) - Resets scroll frame state
+
+	Usage:
+	local PassUIUtilities = require(Modules.Utilities.PassUIUtilities)
+	local frame = PassUIUtilities.safeWaitForChild(parent, "MainFrame", 5)
+	PassUIUtilities.resetGamepassScrollFrame(scrollFrame)
+]]
+
 local PassUIUtilities = {}
 
 local TAG = "[PassUIUtilities]"

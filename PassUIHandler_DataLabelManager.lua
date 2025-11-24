@@ -1,20 +1,24 @@
 --!strict
 
 --[[
-	REFACTOR SUMMARY:
-	Extracted from PassUIHandler.lua (513 lines)
+	PassUIHandler_DataLabelManager - Data label display and animation manager
 
-	Purpose: Data label management
-	- Display name resolution from Player or UserId
-	- Data label text updates and formatting
-	- Animation playback for data label
-	- Rich text formatting for raised amounts
+	What it does:
+	- Resolves player display names from Player instances or UserIds
+	- Updates data label text based on viewing context (own passes vs others)
+	- Formats raised amount with rich text and thousand separators
+	- Plays data label animations with sound effects
 
-	Benefits:
-	- Isolated label display logic
-	- Reusable display name resolution
-	- Clear animation management
-	- Separation from UI construction
+	Returns: Module table with functions:
+	- resolvePlayerDisplayName(playerReference) - Gets display name
+	- playDataLabelAnimation(player, dataLabel, trackTween) - Plays animation
+	- updateLabelForViewingMode(dataLabel, currentlyViewing) - Updates for viewing others
+	- updateLabelForOwnMode(dataLabel, viewer) - Updates for own passes
+	- updateDataDisplayLabel(...) - Main update function
+
+	Usage:
+	local DataLabelManager = require(script.DataLabelManager)
+	DataLabelManager.updateDataDisplayLabel(label, timer, button, viewer, viewing, false, true, trackTween)
 ]]
 
 local Players = game:GetService("Players")
@@ -22,8 +26,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local FormatString = require(Modules.Utilities.FormatString)
 local PassUIUtilities = require(Modules.Utilities.PassUIUtilities)
@@ -31,7 +35,7 @@ local UsernameCache = require(Modules.Caches.UsernameCache)
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local GameConfig = require(Configuration.GameConfig)
 
-local uiSounds: SoundGroup = SoundService:WaitForChild("UI")
+local uiSounds = assert(SoundService:WaitForChild("UI", 10), "UI SoundGroup not found in SoundService")
 
 ---------------
 -- Constants --

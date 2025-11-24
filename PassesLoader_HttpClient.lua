@@ -1,5 +1,29 @@
 --!strict
 
+--[[
+	PassesLoader_HttpClient - HTTP request handler with retry and rate limit logic
+
+	What it does:
+	- Makes HTTP GET requests with automatic retry on failure
+	- Implements exponential backoff for retries
+	- Detects and handles rate limiting (429 errors)
+	- Tracks request timeout and prevents infinite waits
+	- Categorizes errors and tracks rate limit hits
+
+	Returns: Module table with functions:
+	- makeRequest(url, maxRetries?, onRetry?) - Makes HTTP GET with retry logic
+		Returns: HttpResult { success, responseData?, statusCode?, error?, wasRateLimited? }
+
+	Usage:
+	local HttpClient = require(script.HttpClient)
+	local result = HttpClient.makeRequest(url, 3)
+	if result.success then
+		-- Process result.responseData
+	elseif result.wasRateLimited then
+		-- Handle rate limit
+	end
+]]
+
 --------------
 -- Services --
 --------------
@@ -90,6 +114,8 @@ function HttpClient.makeRequest(
 	maxRetries: number?,
 	onRetry: ((attempt: number, maxRetries: number, error: string) -> ())?
 ): HttpResult
+	assert(typeof(url) == "string" and #url > 0, "url must be a non-empty string")
+
 	local retries = maxRetries or CONFIG.RETRY_ATTEMPTS
 	local lastError: string? = nil
 	local lastStatusCode: number? = nil

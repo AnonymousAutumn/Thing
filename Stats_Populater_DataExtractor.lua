@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	Stats Populater DataExtractor Module
+
+	Extracts leaderboard entry data from DataStore pages.
+	Handles pagination and data validation.
+
+	Returns: DataExtractor table with extraction functions
+
+	Usage:
+		local DataExtractor = require(...)
+		local entries = DataExtractor.extractFromPages(pages, maxCount)
+]]
+
 local DataExtractor = {}
 
 ---------------

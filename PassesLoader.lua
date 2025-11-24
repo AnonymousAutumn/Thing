@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	PassesLoader - HTTP API client for fetching Roblox gamepass and game data
+
+	What it does:
+	- Fetches gamepasses from Roblox API by universe ID (with pagination)
+	- Fetches player-owned games/experiences from Roblox API (with pagination)
+	- Aggregates all gamepasses from all player-owned games
+	- Implements rate limiting between requests
+	- Tracks request statistics (success/failure/rate limit hits)
+
+	Returns: Module table with functions:
+	- FetchGamepassesFromUniverseId(universeId) - (success, error, gamepasses?)
+	- FetchPlayerOwnedGames(playerId) - (success, error, universeIds?)
+	- FetchAllPlayerGamepasses(playerId) - (success, error, gamepasses?)
+
+	Usage:
+	local PassesLoader = require(Modules.Loaders.PassesLoader)
+	local success, error, gamepasses = PassesLoader:FetchAllPlayerGamepasses(userId)
+	if success and gamepasses then
+		-- Process gamepasses
+	end
+]]
+
 --------------------
 -- Initialization --
 --------------------
@@ -16,8 +39,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local gameConfig = require(configuration.GameConfig)
 local validationUtils = require(modules.Utilities.ValidationUtils)
@@ -112,6 +135,8 @@ end
 -----------------
 
 function PassesLoader:FetchGamepassesFromUniverseId(universeId: number): (boolean, string, {GamepassData}?)
+	assert(typeof(universeId) == "number", "universeId must be a number")
+
 	if not validationUtils.isValidUniverseId(universeId) then
 		logApiWarning("Invalid universe ID: %s", tostring(universeId))
 		return false, ERROR_MESSAGES.INVALID_UNIVERSE_ID, nil
@@ -196,6 +221,8 @@ function PassesLoader:FetchGamepassesFromUniverseId(universeId: number): (boolea
 end
 
 function PassesLoader:FetchPlayerOwnedGames(playerId: number): (boolean, string, {number}?)
+	assert(typeof(playerId) == "number", "playerId must be a number")
+
 	if not validationUtils.isValidUserId(playerId) then
 		logApiWarning("Invalid player ID: %s", tostring(playerId))
 		return false, ERROR_MESSAGES.INVALID_PLAYER_ID, nil
@@ -266,6 +293,8 @@ function PassesLoader:FetchPlayerOwnedGames(playerId: number): (boolean, string,
 end
 
 function PassesLoader:FetchAllPlayerGamepasses(playerId: number): (boolean, string, {GamepassData}?)
+	assert(typeof(playerId) == "number", "playerId must be a number")
+
 	-- First, fetch all games the player owns
 	local gamesSuccess, gamesError, playerOwnedGames = self:FetchPlayerOwnedGames(playerId)
 

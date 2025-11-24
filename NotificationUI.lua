@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Notification UI System
+
+	Main notification display controller that manages the lifecycle of notification
+	UI elements. Handles notification creation, animation, queueing, sound playback,
+	and automatic removal. Listens to both remote and local notification events.
+
+	Returns: nil (auto-initializes on require)
+
+	Usage:
+		Require this module in a LocalScript parented to the notification ScreenGui.
+		Send notifications via the CreateNotification RemoteEvent or BindableEvent.
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,16 +22,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Failed to find Bindables in Network")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Failed to find Events in Bindables")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes in Network")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events in Remotes")
 
-local globalNotificationEvent = remoteEvents:WaitForChild("CreateNotification")
-local localNotificationEvent = bindableEvents:WaitForChild("CreateNotification")
+local globalNotificationEvent = assert(remoteEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification RemoteEvent")
+local localNotificationEvent = assert(bindableEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification BindableEvent")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
@@ -26,13 +40,13 @@ local NotificationAnimator = require(script.NotificationAnimator)
 local NotificationQueue = require(script.NotificationQueue)
 local SoundManager = require(script.SoundManager)
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances") :: Folder
-local guiPrefabs = instances:WaitForChild("GuiPrefabs") :: Folder
-local notificationTemplate: Frame = guiPrefabs:WaitForChild("NotificationPrefab") :: Frame
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Failed to find Instances in ReplicatedStorage") :: Folder
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "Failed to find GuiPrefabs in Instances") :: Folder
+local notificationTemplate: Frame = assert(guiPrefabs:WaitForChild("NotificationPrefab", 10), "Failed to find NotificationPrefab in GuiPrefabs") :: Frame
 
 local notificationSystemScript: ScreenGui = script.Parent :: ScreenGui
-local mainFrame: Frame = notificationSystemScript:WaitForChild("MainFrame") :: Frame
-local notificationContainer: Frame = mainFrame:WaitForChild("Holder") :: Frame
+local mainFrame: Frame = assert(notificationSystemScript:WaitForChild("MainFrame", 10), "Failed to find MainFrame in NotificationUI") :: Frame
+local notificationContainer: Frame = assert(mainFrame:WaitForChild("Holder", 10), "Failed to find Holder in MainFrame") :: Frame
 
 ---------------
 -- Constants --

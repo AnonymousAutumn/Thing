@@ -1,11 +1,21 @@
 --!strict
 
+--[[
+	Connect4 Module
+
+	Initializes all Connect4 game boards in the workspace.
+	Returns nothing - executes automatically when required.
+
+	Usage:
+		Automatically runs on server start to set up all Connect4 boards.
+]]
+
 ----------------
 -- References --
 ----------------
 
-local Connect4GameController = require(script:WaitForChild("GameController"))
-local connect4BoardsContainer = workspace:WaitForChild("Connect4Boards")
+local Connect4GameController = require(assert(script:WaitForChild("GameController", 10), "GameController module not found"))
+local connect4BoardsContainer = assert(workspace:WaitForChild("Connect4Boards", 10), "Connect4Boards folder not found in workspace")
 
 -----------
 -- Types --

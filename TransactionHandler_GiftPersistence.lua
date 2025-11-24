@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	TransactionHandler GiftPersistence Module
+
+	Handles gift storage and retrieval in DataStores.
+	Manages offline donation tracking for players.
+
+	Returns: GiftPersistence table with persistence functions
+
+	Usage:
+		local GiftPersistence = require(...)
+		GiftPersistence.saveGiftToDataStore(donorId, recipientId, amount)
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,13 +25,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
 
-local UsernameCache = require(Modules.Caches.UsernameCache)
-local DataStoreWrapper = require(Modules.Wrappers.DataStore)
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local GameConfig = require(Configuration.GameConfig)
+local UsernameCache = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("UsernameCache", 10), "Failed to find UsernameCache"))
+local DataStoreWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("DataStore", 10), "Failed to find DataStore"))
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
 -----------
 -- Types --

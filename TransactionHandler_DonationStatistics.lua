@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	TransactionHandler DonationStatistics Module
+
+	Manages donation statistics tracking and leaderboard updates.
+	Handles OrderedDataStore updates and player notifications.
+
+	Returns: DonationStatistics table with statistics functions
+
+	Usage:
+		local DonationStatistics = require(...)
+		DonationStatistics.updateDonationStatistics(donorId, recipientId, amount)
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,20 +25,20 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events")
 
-local notificationEvent: RemoteEvent = remoteEvents:WaitForChild("CreateNotification")
-local messageEvent: RemoteEvent = remoteEvents:WaitForChild("SendMessage")
+local notificationEvent: RemoteEvent = assert(remoteEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification")
+local messageEvent: RemoteEvent = assert(remoteEvents:WaitForChild("SendMessage", 10), "Failed to find SendMessage")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
 
-local PlayerData = require(Modules.Managers.PlayerData)
-local DataStoreWrapper = require(Modules.Wrappers.DataStore)
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local GameConfig = require(Configuration.GameConfig)
+local PlayerData = require(assert(Modules:WaitForChild("Managers", 10):WaitForChild("PlayerData", 10), "Failed to find PlayerData"))
+local DataStoreWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("DataStore", 10), "Failed to find DataStore"))
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
 ---------------
 -- Constants --

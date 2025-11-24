@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Music Handler - Volume Control
+
+	Manages volume state and UI synchronization for the music player.
+	Updates Sound instance volume and syncs the visual slider components
+	(fill bar and drag handle) to reflect current volume level.
+
+	Returns: VolumeControl (module table with volume functions)
+
+	Usage:
+		VolumeControl.updateVolume(volumeState, currentSound, volumeFill, dragHandle, newVolume)
+		VolumeControl.initializeDefaults(volumeFill, dragHandle, initialVolume)
+]]
+
 -----------
 -- Types --
 -----------
@@ -32,7 +46,7 @@ function VolumeControl.updateVolume(
 	volumeDragHandle: GuiObject,
 	newVolumeNormalized: number
 ): ()
-	-- Clamp and store normalized volume (0–1)
+	-- Clamp and store normalized volume (0ï¿½1)
 	volumeState.currentVolumeNormalized = math.clamp(newVolumeNormalized, 0, 1)
 
 	-- Scale by MAX_VOLUME

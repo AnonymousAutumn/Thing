@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Stats UIElementFinder Module
+
+	Locates leaderboard UI elements in the workspace.
+	Traverses hierarchy to find ScrollingFrames for leaderboards.
+
+	Returns: UIElementFinder table with finder functions
+
+	Usage:
+		local UIElementFinder = require(...)
+		UIElementFinder.leaderboardsContainer = workspace.Leaderboards
+		local frame = UIElementFinder.getLeaderboardUIElements(config)
+]]
+
 ---------------
 -- Constants --
 ---------------

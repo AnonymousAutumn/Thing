@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	DataPersistence Module
+
+	Handles persistence of combat win data to DataStores and PlayerData system.
+	Returns a table with recordPlayerWin method.
+
+	Usage:
+		DataPersistence.recordPlayerWin(userId, winCount)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,8 +19,8 @@ local DataStoreService = game:GetService("DataStoreService")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found")
 
 local PlayerData = require(Modules.Managers.PlayerData)
 local DataStoreWrapper = require(Modules.Wrappers.DataStore)

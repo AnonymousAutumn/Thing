@@ -1,29 +1,42 @@
 --!strict
 
+--[[
+	ShopHandler Script
+
+	Handles shop UI interactions and purchase button setup.
+	Manages product and gamepass purchase flows on the client side.
+
+	Returns: Nothing (client-side script)
+
+	Usage: Runs automatically when placed in game
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ButtonWrapper = require(Modules.Wrappers.Buttons)
-local PurchaseWrapper = require(Modules.Wrappers.Purchases)
-local NotificationHelper = require(Modules.Utilities.NotificationHelper)
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local ButtonWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("Buttons", 10), "Failed to find Buttons wrapper"))
+local PurchaseWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("Purchases", 10), "Failed to find Purchases wrapper"))
+local NotificationHelper = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("NotificationHelper", 10), "Failed to find NotificationHelper"))
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
 
-local Network = ReplicatedStorage:WaitForChild("Network")
-local sendNotificationEvent = Network.Bindables.Events.CreateNotification
+local Network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local sendNotificationEvent = assert(Network:WaitForChild("Bindables", 10):WaitForChild("Events", 10):WaitForChild("CreateNotification", 10), "Failed to find CreateNotification event")
 
-local uiSounds = SoundService.UI
-local feedbackSounds = SoundService.Feedback
+local uiSounds = assert(SoundService:WaitForChild("UI", 10), "Failed to find UI sounds")
+local feedbackSounds = assert(SoundService:WaitForChild("Feedback", 10), "Failed to find Feedback sounds")
 
-local ScrollingFrame = workspace.World.Structures.Store.ProductsHolder.SurfaceGui.MainFrame.ItemScrollingFrame
+local ScrollingFrame = assert(workspace:WaitForChild("World", 10):WaitForChild("Structures", 10):WaitForChild("Store", 10):WaitForChild("ProductsHolder", 10):WaitForChild("SurfaceGui", 10):WaitForChild("MainFrame", 10):WaitForChild("ItemScrollingFrame", 10), "Failed to find shop ScrollingFrame")
 
 local resourceManager = ResourceCleanup.new()
 
 local function handleProductPurchaseButtonInteraction(button)
+	assert(button, "Button is required")
 	local assetId = button:GetAttribute("AssetId")
+	assert(assetId, "AssetId attribute is required on button")
 
 	PurchaseWrapper.attemptPurchase({
 		player = LocalPlayer,
@@ -40,7 +53,9 @@ local function handleProductPurchaseButtonInteraction(button)
 end
 
 local function handleGamePassPurchaseButtonInteraction(button)
+	assert(button, "Button is required")
 	local assetId = button:GetAttribute("AssetId")
+	assert(assetId, "AssetId attribute is required on button")
 
 	PurchaseWrapper.attemptPurchase({
 		player = LocalPlayer,

@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	ZoneDetector Module
+
+	Monitors player position relative to combat zone and manages entry/exit.
+	Returns a table with startMonitoring method.
+
+	Usage:
+		ZoneDetector.startMonitoring(player, zonePart, isInPartFunc, giveToolFunc, removeToolFunc)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,12 +19,12 @@ local RunService = game:GetService("RunService")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local updateGameUIEvent = remoteEvents:WaitForChild("UpdateGameUI")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found")
+local updateGameUIEvent = assert(remoteEvents:WaitForChild("UpdateGameUI", 10), "UpdateGameUI event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 ---------------

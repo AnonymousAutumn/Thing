@@ -1,9 +1,22 @@
 --!strict
 
+--[[
+	Stats Populater DisplayFormatter Module
+
+	Formats leaderboard display data (usernames, ranks, statistics).
+	Handles text formatting and number conversion.
+
+	Returns: DisplayFormatter table with formatting functions
+
+	Usage:
+		local DisplayFormatter = require(...)
+		local text = DisplayFormatter.formatStatistic(value, config)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local UsernameCache = require(Modules.Caches.UsernameCache)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local UsernameCache = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("UsernameCache", 10), "Failed to find UsernameCache"))
 
 local DisplayFormatter = {}
 

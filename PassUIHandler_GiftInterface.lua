@@ -1,5 +1,24 @@
 --!strict
 
+--[[
+	PassUIHandler_GiftInterface - Gift UI mode toggle and state management
+
+	What it does:
+	- Handles remote event for toggling gift interface
+	- Validates gift giver and recipient (Player or UserId)
+	- Implements rate limiting to prevent UI spam
+	- Manages gifting state and unequips held tools
+	- Coordinates with parent module for UI operations
+
+	Returns: Module table with functions:
+	- handleGiftInterfaceToggle(giftGiver, giftRecipient) - Toggles gift UI
+
+	Usage:
+	local GiftInterface = require(script.GiftInterface)
+	GiftInterface.retrievePlayerDonationInterface = parentFunc  -- Inject dependencies
+	GiftInterface.handleGiftInterfaceToggle(player, recipientPlayer)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,13 +28,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found in Network")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found in Remotes")
 
-local highlightEvent = remoteEvents:WaitForChild("CreateHighlight")
+local highlightEvent = assert(remoteEvents:WaitForChild("CreateHighlight", 10), "CreateHighlight event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local EnhancedValidation = require(Modules.Utilities.EnhancedValidation)
 local RateLimiter = require(Modules.Utilities.RateLimiter)

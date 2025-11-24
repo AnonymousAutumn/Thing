@@ -1,9 +1,22 @@
 --!strict
 
+--[[
+	Stats UpdateScheduler Module
+
+	Schedules and manages leaderboard update loops.
+	Handles update intervals, backoff logic, and client ready events.
+
+	Returns: UpdateScheduler table with scheduling functions
+
+	Usage:
+		local UpdateScheduler = require(...)
+		UpdateScheduler.setupLeaderboardUpdateLoop(leaderboardState)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
 
 ---------------
 -- Constants --

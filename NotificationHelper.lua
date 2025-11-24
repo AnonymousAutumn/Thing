@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	Notification Helper
+
+	Utility module for sending notifications via BindableEvent with type safety
+	and error handling. Provides convenience functions for different notification
+	types (Success, Warning, Error, Info).
+
+	Returns: NotificationHelper (module table with send functions)
+
+	Usage:
+		NotificationHelper.sendSuccess(event, "Operation completed!")
+		NotificationHelper.sendError(event, "Something went wrong")
+		NotificationHelper.send(event, "Custom message", "Info")
+]]
+
 -----------
 -- Types --
 -----------

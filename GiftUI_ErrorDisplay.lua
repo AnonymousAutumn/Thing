@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	GiftUI_ErrorDisplay - Error message display management
+
+	This module manages error message display for the gift sending interface:
+	- Shows error messages with input disable
+	- Auto-hides error messages after a timeout
+	- Manages UI element visibility during error states
+
+	Returns: ErrorDisplay module with message display functions
+
+	Usage:
+		ErrorDisplay.safeExecute = yourSafeExecuteFunction
+		ErrorDisplay.displayTemporaryErrorMessage(elements, "Error message")
+]]
+
 ---------------
 -- Constants --
 ---------------
@@ -30,6 +45,9 @@ ErrorDisplay.safeExecute = nil :: (((() -> ()) -> boolean))?
 	@param errorMessageText string - Error message to display
 ]]
 function ErrorDisplay.showErrorMessage(elements: ErrorDisplayElements, errorMessageText: string): ()
+	assert(elements, "ErrorDisplay.showErrorMessage: elements is required")
+	assert(typeof(errorMessageText) == "string", "ErrorDisplay.showErrorMessage: errorMessageText must be a string")
+
 	if not ErrorDisplay.safeExecute then
 		return
 	end
@@ -48,6 +66,8 @@ end
 	@param elements ErrorDisplayElements - UI elements
 ]]
 function ErrorDisplay.hideErrorMessage(elements: ErrorDisplayElements): ()
+	assert(elements, "ErrorDisplay.hideErrorMessage: elements is required")
+
 	if not ErrorDisplay.safeExecute then
 		return
 	end
@@ -70,6 +90,9 @@ end
 	@param errorMessageText string - Error message to display
 ]]
 function ErrorDisplay.displayTemporaryErrorMessage(elements: ErrorDisplayElements, errorMessageText: string): ()
+	assert(elements, "ErrorDisplay.displayTemporaryErrorMessage: elements is required")
+	assert(typeof(errorMessageText) == "string", "ErrorDisplay.displayTemporaryErrorMessage: errorMessageText must be a string")
+
 	ErrorDisplay.showErrorMessage(elements, errorMessageText)
 	task.delay(ERROR_MESSAGE_DISPLAY_DURATION, function()
 		ErrorDisplay.hideErrorMessage(elements)

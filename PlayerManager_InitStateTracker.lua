@@ -1,5 +1,33 @@
 --!strict
 
+--[[
+	PlayerManager_InitStateTracker - Player initialization state tracking system
+
+	What it does:
+	- Tracks initialization state for each player (start time, completion, success/error)
+	- Manages timeout threads for initialization deadlines
+	- Provides scheduled cleanup of old initialization states
+	- Tracks active initialization count
+	- Cancels timeout threads on successful completion
+
+	Returns: Module table with:
+	- new() - Creates tracker instance
+	- create(player) - Creates init state for player
+	- scheduleTimeout(state, seconds, onTimeout) - Schedules timeout callback
+	- cancelTimeout(state) - Cancels scheduled timeout
+	- complete(state, success, error?) - Marks initialization complete
+	- scheduleCleanup(userId, delaySeconds) - Schedules state cleanup
+	- getState(userId) - Gets existing state
+	- getActiveCount() - Gets count of active states
+	- createWithTimeout(player, timeout?, onTimeout?) - Helper: create + schedule timeout
+
+	Usage:
+	local InitStateTracker = require(script.InitStateTracker)
+	local tracker = InitStateTracker.new()
+	local state = tracker:createWithTimeout(player, 30, handleTimeout)
+	tracker:complete(state, true)
+]]
+
 -----------
 -- Types --
 -----------

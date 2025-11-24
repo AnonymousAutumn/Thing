@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	EliminationHandler Module
+
+	Manages player elimination logic including killer detection and win recording.
+	Returns a table with handlePlayerElimination and getKillerFromHumanoid methods.
+
+	Usage:
+		EliminationHandler.handlePlayerElimination(victim, killer, recordWinCallback)
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,13 +18,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local updateGameUIEvent = remoteEvents:WaitForChild("UpdateGameUI")
-local playSoundEvent = remoteEvents:WaitForChild("PlaySound")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found")
+local updateGameUIEvent = assert(remoteEvents:WaitForChild("UpdateGameUI", 10), "UpdateGameUI event not found")
+local playSoundEvent = assert(remoteEvents:WaitForChild("PlaySound", 10), "PlaySound event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 ---------------

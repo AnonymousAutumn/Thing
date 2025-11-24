@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	Stats Populater Module
+
+	Handles leaderboard entry frame population with player data.
+	Manages username, rank, and statistic display formatting.
+
+	Returns: LeaderboardDisplayManager table with population functions
+
+	Usage:
+		local Populater = require(...)
+		Populater.populateLeaderboardEntryDataAsync(frame, userId, value, config)
+]]
+
 -----------------
 -- Initializer --
 -----------------
@@ -10,16 +23,16 @@ local LeaderboardDisplayManager = {}
 -- Services --
 --------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
 
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local UsernameCache = require(Modules.Caches.UsernameCache)
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local UsernameCache = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("UsernameCache", 10), "Failed to find UsernameCache"))
 
-local FrameValidator = require(script.FrameValidator)
-local DisplayFormatter = require(script.DisplayFormatter)
-local ColorStyler = require(script.ColorStyler)
-local PlayerRenderer = require(script.PlayerRenderer)
-local DataExtractor = require(script.DataExtractor)
+local FrameValidator = require(assert(script:WaitForChild("FrameValidator", 10), "Failed to find FrameValidator"))
+local DisplayFormatter = require(assert(script:WaitForChild("DisplayFormatter", 10), "Failed to find DisplayFormatter"))
+local ColorStyler = require(assert(script:WaitForChild("ColorStyler", 10), "Failed to find ColorStyler"))
+local PlayerRenderer = require(assert(script:WaitForChild("PlayerRenderer", 10), "Failed to find PlayerRenderer"))
+local DataExtractor = require(assert(script:WaitForChild("DataExtractor", 10), "Failed to find DataExtractor"))
 
 -----------
 -- Types --

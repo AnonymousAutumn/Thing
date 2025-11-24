@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	GiftUI_TimeFormatter - Time formatting utilities for gift timestamps
+
+	This module handles relative time display for gift timestamps:
+	- Calculates relative time descriptions ("2 minutes ago", etc.)
+	- Updates all gift time display labels
+	- Handles multiple time granularities (seconds, minutes, hours, days)
+
+	Returns: TimeFormatter module with time formatting functions
+
+	Usage:
+		local description = TimeFormatter.calculateRelativeTimeDescription(timestamp)
+		TimeFormatter.updateAllGiftTimeDisplayLabels(timeDisplayEntries, safeExecute)
+]]
+
 --------------
 -- Services --
 --------------
@@ -17,6 +32,7 @@ export type TimeDisplayEntry = {
 -- Constants --
 ---------------
 local TAG = "[GiftUI.TimeFormatter]"
+local WAIT_TIMEOUT = 10
 
 local TIME_THRESHOLDS = {
 	MINUTE = 60,
@@ -40,7 +56,7 @@ local TIME_DESC_DAY = "a day ago"
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 ---------------
@@ -79,6 +95,10 @@ local function updateAllGiftTimeDisplayLabels(
 	timeDisplayEntries: { TimeDisplayEntry },
 	safeExecute: (func: () -> (), errorMessage: string) -> boolean
 ): ()
+	assert(timeDisplayEntries, "updateAllGiftTimeDisplayLabels: timeDisplayEntries is required")
+	assert(typeof(timeDisplayEntries) == "table", "updateAllGiftTimeDisplayLabels: timeDisplayEntries must be a table")
+	assert(safeExecute, "updateAllGiftTimeDisplayLabels: safeExecute is required")
+
 	for i, timeDisplayEntry in timeDisplayEntries do
 		local label = timeDisplayEntry.timeDisplayLabel
 		if label and label.Parent then

@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	LeaderboardUI_RigCreator - Character rig display manager for leaderboards
+
+	This module manages 3D character displays in leaderboard ViewportFrames:
+	- Creates and positions character rigs for top 3 players
+	- Manages rig animations and cleanup
+	- Coordinates with submodules for building, positioning, and animating
+
+	Returns: LeaderboardCharacterDisplayManager class
+
+	Usage:
+		local manager = LeaderboardCharacterDisplayManager.new(surfaceGui)
+		manager:processResults({userId1, userId2, userId3})
+		manager:clearAllDisplayedCharacters()
+		manager:cleanup()
+]]
+
 local LeaderboardCharacterDisplayManager = {}
 LeaderboardCharacterDisplayManager.__index = LeaderboardCharacterDisplayManager
 
@@ -9,16 +26,25 @@ LeaderboardCharacterDisplayManager.__index = LeaderboardCharacterDisplayManager
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+---------------
+-- Constants --
+---------------
+local TAG = "[LeaderboardUI_RigCreator]"
+local WAIT_TIMEOUT = 10
+local COMPONENT_WAIT_TIMEOUT = 10
+local LEADERBOARD_RANK_POSITIONS = { "Gold", "Silver", "Bronze" }
+local MAX_CHARACTERS_DISPLAYED = 3
+
 --------------
 -- Modules  --
 --------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 -- Submodules
-local RigBuilder = require(script.RigBuilder)
-local RigPositioner = require(script.RigPositioner)
-local AnimationController = require(script.AnimationController)
+local RigBuilder = require(assert(script:WaitForChild("RigBuilder", WAIT_TIMEOUT), TAG .. " RigBuilder not found"))
+local RigPositioner = require(assert(script:WaitForChild("RigPositioner", WAIT_TIMEOUT), TAG .. " RigPositioner not found"))
+local AnimationController = require(assert(script:WaitForChild("AnimationController", WAIT_TIMEOUT), TAG .. " AnimationController not found"))
 
 -----------
 -- Types --
@@ -29,13 +55,6 @@ type CharacterRig = {
 	userId: number,
 	rank: number,
 }
-
----------------
--- Constants --
----------------
-local LEADERBOARD_RANK_POSITIONS = { "Gold", "Silver", "Bronze" }
-local MAX_CHARACTERS_DISPLAYED = 3
-local COMPONENT_WAIT_TIMEOUT = 10
 
 ---------------
 -- Utilities --
@@ -69,15 +88,13 @@ AnimationController.safeExecute = safeExecute
 -- Initializers --
 -----------------
 local function initializeComponents(leaderboardSurfaceGui: SurfaceGui): (ViewportFrame?, WorldModel?)
-	local mainFrame = waitForChildSafe(leaderboardSurfaceGui, "MainFrame", COMPONENT_WAIT_TIMEOUT)
-	if not mainFrame or not mainFrame:IsA("ViewportFrame") then
-		error("MainFrame not found")
-	end
+	assert(leaderboardSurfaceGui, "initializeComponents: leaderboardSurfaceGui is required")
 
-	local worldModel = waitForChildSafe(mainFrame, "WorldModel", COMPONENT_WAIT_TIMEOUT)
-	if not worldModel or not worldModel:IsA("WorldModel") then
-		error("WorldModel not found")
-	end
+	local mainFrame = assert(waitForChildSafe(leaderboardSurfaceGui, "MainFrame", COMPONENT_WAIT_TIMEOUT), TAG .. " MainFrame not found")
+	assert(mainFrame:IsA("ViewportFrame"), TAG .. " MainFrame is not a ViewportFrame")
+
+	local worldModel = assert(waitForChildSafe(mainFrame, "WorldModel", COMPONENT_WAIT_TIMEOUT), TAG .. " WorldModel not found")
+	assert(worldModel:IsA("WorldModel"), TAG .. " WorldModel is not a WorldModel")
 
 	return mainFrame :: ViewportFrame, worldModel :: WorldModel
 end
@@ -162,9 +179,7 @@ local function processSinglePlayerCharacter(self: any, playerUserId: number, ran
 end
 
 function LeaderboardCharacterDisplayManager:processResults(topPlayerUserIds: { number })
-	if typeof(topPlayerUserIds) ~= "table" then
-		return
-	end
+	assert(typeof(topPlayerUserIds) == "table", "LeaderboardCharacterDisplayManager:processResults: topPlayerUserIds must be a table")
 
 	local displayCount = math.min(#topPlayerUserIds, MAX_CHARACTERS_DISPLAYED)
 

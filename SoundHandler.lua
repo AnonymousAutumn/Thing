@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	SoundHandler Script
+
+	Handles client-side sound playback for game outcomes (victory/defeat).
+	Listens to server sound requests and plays appropriate sounds.
+
+	Returns: Nothing (client-side script)
+
+	Usage: Runs automatically when placed in game
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,17 +22,17 @@ local Players = game:GetService("Players")
 -- References --
 ----------------
 
-local network : Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local playSoundEvent = remoteEvents:WaitForChild("PlaySound")
+local network : Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes folder")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events folder")
+local playSoundEvent = assert(remoteEvents:WaitForChild("PlaySound", 10), "Failed to find PlaySound event")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
 
-local feedbackGroup : SoundGroup = SoundService:WaitForChild("Feedback")
-local defeatSound = feedbackGroup:WaitForChild("Defeat")
-local victorySound = feedbackGroup:WaitForChild("Victory")
+local feedbackGroup : SoundGroup = assert(SoundService:WaitForChild("Feedback", 10), "Failed to find Feedback sound group")
+local defeatSound = assert(feedbackGroup:WaitForChild("Defeat", 10), "Failed to find Defeat sound")
+local victorySound = assert(feedbackGroup:WaitForChild("Victory", 10), "Failed to find Victory sound")
 
 ---------------
 -- State/Utils --

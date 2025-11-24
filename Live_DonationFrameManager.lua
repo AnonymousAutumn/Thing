@@ -1,5 +1,23 @@
 --!strict
 
+--[[
+	Donation Frame Manager
+
+	Manages the lifecycle and display of donation frames in the live leaderboard.
+	Tracks active frames (large and standard), enforces display limits, handles
+	automatic cleanup, and manages frame repositioning.
+
+	Returns: DonationFrameManager (module table with constructor)
+
+	Usage:
+		local manager = DonationFrameManager.new(largeContainer, standardContainer)
+		manager:addLargeFrame(frame)
+		manager:enforceLimit("large", 5)
+		manager:scheduleCleanup(frame, "standard", 60)
+		manager:startCleanupLoop()
+		manager:shutdown()
+]]
+
 -----------
 -- Types --
 -----------

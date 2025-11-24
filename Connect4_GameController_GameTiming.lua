@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	Connect4_GameController_GameTiming
+
+	Manages timing and scheduling for Connect4 game turns, timeouts, and delays.
+
+	Returns: TimingManager class with methods for:
+		- Turn timeout management (30s default)
+		- Token drop cooldown scheduling (0.65s)
+		- Game reset delay scheduling (3s)
+
+	Usage:
+		local GameTiming = require(script.Connect4_GameController_GameTiming)
+		local timingManager = GameTiming.new()
+		timingManager:startTurnTimeout(function() print("Turn timed out!") end)
+		timingManager:cancelCurrentTimeout()
+]]
+
 ---------------
 -- Constants --
 ---------------
@@ -48,6 +65,8 @@ end
 	@param onTimeout TimeoutCallback - Function to call when timeout expires
 ]]
 function GameTiming:startTurnTimeout(onTimeout: TimeoutCallback): ()
+	assert(typeof(onTimeout) == "function", "onTimeout must be a function")
+
 	self.currentTimeoutId += 1
 	local timeoutId = self.currentTimeoutId
 
@@ -73,6 +92,7 @@ end
 	@param callback TimeoutCallback - Function to call after reset delay
 ]]
 function GameTiming.scheduleReset(callback: TimeoutCallback): ()
+	assert(typeof(callback) == "function", "callback must be a function")
 	task.delay(CONFIG.RESET_DELAY, callback)
 end
 
@@ -82,6 +102,7 @@ end
 	@param callback TimeoutCallback - Function to call after cooldown
 ]]
 function GameTiming.scheduleDropCooldown(callback: TimeoutCallback): ()
+	assert(typeof(callback) == "function", "callback must be a function")
 	task.delay(CONFIG.TOKEN_DROP_COOLDOWN, callback)
 end
 

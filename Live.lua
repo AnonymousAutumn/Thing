@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	Live Donation Leaderboard System
+
+	This module manages the live donation display leaderboard, showing real-time donation
+	notifications with tiered visual effects. Handles cross-server donation notifications,
+	frame animations, and automatic cleanup of donation displays.
+
+	Returns: nil (auto-initializes on require)
+
+	Usage:
+		Simply require this module to start the live donation display system.
+		The system will automatically:
+		- Subscribe to cross-server donation events
+		- Display donations in tiered frames (large/standard)
+		- Manage frame lifecycle and cleanup
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,8 +26,8 @@ local Workspace = game:GetService("Workspace")
 ----------------
 -- References --
 ----------------
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local GameConfig = require(configuration.GameConfig)
 local ResourceCleanup = require(modules.Wrappers.ResourceCleanup)
@@ -24,17 +41,17 @@ local CrossServerBridge = require(script.CrossServerBridge)
 type DonationTierInfo = DonationTierCalculator.DonationTierInfo
 type DonationNotificationData = CrossServerBridge.DonationNotificationData
 
-local instances = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs = instances:WaitForChild("GuiPrefabs")
-local liveDonationPrefab = guiPrefabs:WaitForChild("LiveDonationPrefab")
+local instances = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Failed to find Instances in ReplicatedStorage")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "Failed to find GuiPrefabs in Instances")
+local liveDonationPrefab = assert(guiPrefabs:WaitForChild("LiveDonationPrefab", 10), "Failed to find LiveDonationPrefab in GuiPrefabs")
 
-local leaderboardsFolder = Workspace:WaitForChild("Leaderboards")
-local liveDonationLeaderboard = leaderboardsFolder:WaitForChild(script.Name)
-local leaderboardSurfaceGui = liveDonationLeaderboard:WaitForChild("SurfaceGui")
-local leaderboardMainFrame = leaderboardSurfaceGui:WaitForChild("MainFrame")
-local donationScrollingFrame = leaderboardMainFrame:WaitForChild("ScrollingFrame")
-local largeDonationDisplayFrame = donationScrollingFrame:WaitForChild("DistinctFrame")
-local standardDonationDisplayFrame = donationScrollingFrame:WaitForChild("NormalFrame")
+local leaderboardsFolder = assert(Workspace:WaitForChild("Leaderboards", 10), "Failed to find Leaderboards in Workspace")
+local liveDonationLeaderboard = assert(leaderboardsFolder:WaitForChild(script.Name, 10), "Failed to find " .. script.Name .. " in Leaderboards")
+local leaderboardSurfaceGui = assert(liveDonationLeaderboard:WaitForChild("SurfaceGui", 10), "Failed to find SurfaceGui in LiveDonationLeaderboard")
+local leaderboardMainFrame = assert(leaderboardSurfaceGui:WaitForChild("MainFrame", 10), "Failed to find MainFrame in SurfaceGui")
+local donationScrollingFrame = assert(leaderboardMainFrame:WaitForChild("ScrollingFrame", 10), "Failed to find ScrollingFrame in MainFrame")
+local largeDonationDisplayFrame = assert(donationScrollingFrame:WaitForChild("DistinctFrame", 10), "Failed to find DistinctFrame in ScrollingFrame")
+local standardDonationDisplayFrame = assert(donationScrollingFrame:WaitForChild("NormalFrame", 10), "Failed to find NormalFrame in ScrollingFrame")
 
 ---------------
 -- Constants --

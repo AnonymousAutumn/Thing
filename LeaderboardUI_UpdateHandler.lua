@@ -1,8 +1,29 @@
 --!strict
 
+--[[
+	LeaderboardUI_UpdateHandler - Update handling for leaderboards
+
+	This module manages leaderboard update events:
+	- Connects to server update RemoteEvents
+	- Processes incoming leaderboard data
+	- Signals client readiness to server
+	- Tracks update connections for cleanup
+
+	Returns: UpdateHandler module with update setup functions
+
+	Usage:
+		UpdateHandler.setupUpdates(
+			updateRemoteEvent,
+			clientHandler,
+			state,
+			updateStateFunc
+		)
+]]
+
 --------------
 -- Constants --
 --------------
+local TAG = "[LeaderboardUI_UpdateHandler]"
 local CLIENT_READY_MESSAGE = "Ready"
 
 -----------
@@ -61,9 +82,11 @@ function UpdateHandler.setupUpdates(
 	state: LeaderboardState,
 	updateStateFunc: (state: LeaderboardState) -> ()
 ): boolean
-	if not updateRemoteEvent or not updateRemoteEvent:IsA("RemoteEvent") or not clientHandler or not state then
-		return false
-	end
+	assert(updateRemoteEvent, "UpdateHandler.setupUpdates: updateRemoteEvent is required")
+	assert(updateRemoteEvent:IsA("RemoteEvent"), "UpdateHandler.setupUpdates: updateRemoteEvent must be a RemoteEvent")
+	assert(clientHandler, "UpdateHandler.setupUpdates: clientHandler is required")
+	assert(state, "UpdateHandler.setupUpdates: state is required")
+	assert(updateStateFunc, "UpdateHandler.setupUpdates: updateStateFunc is required")
 
 	return safeExecute(function()
 		local updateConnection = updateRemoteEvent.OnClientEvent:Connect(function(serverLeaderboardData)

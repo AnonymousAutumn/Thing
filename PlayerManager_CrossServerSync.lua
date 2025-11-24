@@ -1,5 +1,30 @@
 --!strict
 
+--[[
+	PlayerManager_CrossServerSync - MessagingService wrapper for leaderboard synchronization
+
+	What it does:
+	- Wraps MessagingService subscription with retry logic
+	- Validates leaderboard update messages (UserId, Stat, Value)
+	- Implements exponential backoff for failed connections
+	- Provides clean connection lifecycle management
+	- Extracts and validates update data from message envelopes
+
+	Returns: Module table with:
+	- new() - Creates sync manager instance
+	- subscribe(topic, handler, maxRetries?) - Subscribes to topic with retry
+	- disconnect() - Disconnects from MessagingService
+	- isConnected() - Checks connection status
+	- validateUpdateMessage(message) - Validates message structure
+	- extractUpdate(message) - Extracts validated update data
+	- createLeaderboardSync(handler) - Helper to create and subscribe
+
+	Usage:
+	local CrossServerSync = require(script.CrossServerSync)
+	local sync = CrossServerSync.new()
+	sync:subscribe("LeaderboardUpdate", function(msg) ... end)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,8 +34,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local GameConfig = require(Configuration.GameConfig)

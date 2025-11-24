@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	GiftUI_ValidationHandler - Input validation for gift system
+
+	This module validates all gift-related user inputs and data:
+	- Validates gift data structures from server
+	- Validates usernames and user IDs
+	- Prevents self-gifting
+	- Retrieves user info from Roblox API
+
+	Returns: ValidationHandler module with validation functions
+
+	Usage:
+		if ValidationHandler.isValidGiftData(data) then ... end
+		local userId = ValidationHandler.retrieveUserIdFromUsername(username)
+		if ValidationHandler.validateUsernameInput(username, errorCallback) then ... end
+]]
+
 --------------
 -- Services --
 --------------
@@ -20,6 +37,7 @@ export type GiftData = {
 -- Constants --
 ---------------
 local TAG = "[GiftUI.ValidationHandler]"
+local WAIT_TIMEOUT = 10
 
 local ERROR_INVALID_USERNAME = "INVALID USERNAME"
 local ERROR_CANNOT_GIFT_SELF = "CANNOT GIFT TO YOURSELF"
@@ -28,7 +46,7 @@ local ERROR_CANNOT_GIFT_SELF = "CANNOT GIFT TO YOURSELF"
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 ---------------
@@ -67,6 +85,9 @@ local function validateUsernameInput(
 	username: string,
 	displayTemporaryErrorMessage: (errorMessage: string) -> ()
 ): boolean
+	assert(typeof(username) == "string", "validateUsernameInput: username must be a string")
+	assert(displayTemporaryErrorMessage, "validateUsernameInput: displayTemporaryErrorMessage is required")
+
 	if not ValidationUtils.isValidUsername(username) then
 		displayTemporaryErrorMessage(ERROR_INVALID_USERNAME)
 		return false
@@ -78,6 +99,8 @@ local function validateTargetUserId(
 	userId: number?,
 	displayTemporaryErrorMessage: (errorMessage: string) -> ()
 ): boolean
+	assert(displayTemporaryErrorMessage, "validateTargetUserId: displayTemporaryErrorMessage is required")
+
 	if not userId then
 		displayTemporaryErrorMessage(ERROR_INVALID_USERNAME)
 		return false
@@ -89,6 +112,8 @@ local function validateTargetUsername(
 	username: string?,
 	displayTemporaryErrorMessage: (errorMessage: string) -> ()
 ): boolean
+	assert(displayTemporaryErrorMessage, "validateTargetUsername: displayTemporaryErrorMessage is required")
+
 	if not username then
 		displayTemporaryErrorMessage(ERROR_INVALID_USERNAME)
 		return false
@@ -101,6 +126,10 @@ local function isGiftingToSelf(
 	localPlayerName: string,
 	displayTemporaryErrorMessage: (errorMessage: string) -> ()
 ): boolean
+	assert(typeof(username) == "string", "isGiftingToSelf: username must be a string")
+	assert(typeof(localPlayerName) == "string", "isGiftingToSelf: localPlayerName must be a string")
+	assert(displayTemporaryErrorMessage, "isGiftingToSelf: displayTemporaryErrorMessage is required")
+
 	if username == localPlayerName then
 		displayTemporaryErrorMessage(ERROR_CANNOT_GIFT_SELF)
 		return true

@@ -1,5 +1,17 @@
 --!strict
 
+--[[
+	CacheManager Module
+
+	Provides time-based caching with automatic cleanup and statistics tracking.
+	Returns a table with a .new() constructor for creating cache instances.
+
+	Usage:
+		local cache = CacheManager.new(3600, 600, true)
+		cache:set("key", "value")
+		local value = cache:get("key")
+]]
+
 -----------
 -- Types --
 -----------
@@ -87,6 +99,13 @@ function CacheManager.new<K, V>(
 	cleanupInterval: number?,
 	autoCleanup: boolean?
 ): CacheManager<K, V>
+	if maxAge ~= nil then
+		assert(type(maxAge) == "number" and maxAge > 0, "maxAge must be a positive number")
+	end
+	if cleanupInterval ~= nil then
+		assert(type(cleanupInterval) == "number" and cleanupInterval > 0, "cleanupInterval must be a positive number")
+	end
+
 	local self: CacheManagerInternal<K, V> = {
 		_cache = {},
 		_maxAge = maxAge or DEFAULT_MAX_AGE,

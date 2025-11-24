@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Stands Utility Module
+
+	Provides utility functions for stand management and refresh operations.
+	Handles stand UI updates and player-to-stand mappings.
+
+	Returns: StandUtils table with utility functions
+
+	Usage:
+		local StandUtils = require(...)
+		StandUtils.SetPlayerToStandTable(playerToStandMap)
+		StandUtils.RefreshStandForPlayer(player)
+]]
+
 local StandUtils = {}
 
 -----------
@@ -29,14 +43,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes folder")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events folder")
 
-local refreshStand = remoteEvents:WaitForChild("RefreshStand")
+local refreshStand = assert(remoteEvents:WaitForChild("RefreshStand", 10), "Failed to find RefreshStand event")
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local GamepassCacheManager = require(modules.Caches.PassCache)
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local GamepassCacheManager = require(assert(modules:WaitForChild("Caches", 10):WaitForChild("PassCache", 10), "Failed to find PassCache"))
 
 ---------------
 -- Variables --

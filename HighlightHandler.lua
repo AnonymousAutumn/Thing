@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	HighlightHandler - Character highlight system
+
+	This script manages visual highlighting of player characters:
+	- Creates outline highlights on target characters
+	- Handles highlight cleanup on character death/removal
+	- Listens for server highlight requests via RemoteEvent
+	- Supports both Player instances and userId references
+
+	Returns: Nothing (initializes and runs automatically)
+
+	Usage: This script runs automatically when parented to a character model.
+	Server triggers highlights via CreateHighlight RemoteEvent.
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,12 +26,20 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Constants --
 ---------------
 
-local network : Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local createHighlightEvent = remoteEvents:WaitForChild("CreateHighlight")
+local TAG = "[HighlightHandler]"
+local WAIT_TIMEOUT = 10
+local HUMANOID_WAIT_TIMEOUT = 10
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+----------------
+-- References --
+----------------
+
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", WAIT_TIMEOUT), TAG .. " Network folder not found")
+local remotes = assert(network:WaitForChild("Remotes", WAIT_TIMEOUT), TAG .. " Remotes folder not found")
+local remoteEvents = assert(remotes:WaitForChild("Events", WAIT_TIMEOUT), TAG .. " Events folder not found")
+local createHighlightEvent = assert(remoteEvents:WaitForChild("CreateHighlight", WAIT_TIMEOUT), TAG .. " CreateHighlight event not found")
+
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 local HIGHLIGHT_CONFIG = {
@@ -25,8 +48,6 @@ local HIGHLIGHT_CONFIG = {
 	outlineColor = Color3.fromRGB(255, 255, 255),
 	depthMode = Enum.HighlightDepthMode.AlwaysOnTop,
 }
-
-local HUMANOID_WAIT_TIMEOUT = 10
 
 -----------
 -- State --
@@ -57,7 +78,10 @@ local function removeActiveHighlight(): ()
 end
 
 local function createHighlight(targetCharacter: Model): Highlight?
-	if not targetCharacter or not targetCharacter.Parent then
+	assert(targetCharacter, "createHighlight: targetCharacter is required")
+	assert(targetCharacter:IsA("Model"), "createHighlight: targetCharacter must be a Model")
+
+	if not targetCharacter.Parent then
 		return nil
 	end
 
@@ -128,17 +152,13 @@ end
 local function initialize(): boolean
 	-- Validate owner character
 	if not state.ownerCharacter or not state.ownerCharacter:IsA("Model") then
-		warn("HighlightHandler: script.Parent is not a Model; aborting.")
+		warn(TAG .. " script.Parent is not a Model; aborting.")
 		return false
 	end
 
-	local success, humanoid = pcall(function()
-		return state.ownerCharacter:WaitForChild("Humanoid", HUMANOID_WAIT_TIMEOUT)
-	end)
-	if not success or not humanoid then
-		warn(string.format("HighlightHandler: Humanoid not found in %s", state.ownerCharacter.Name))
-		return false
-	end
+	local humanoid = state.ownerCharacter:WaitForChild("Humanoid", HUMANOID_WAIT_TIMEOUT)
+	assert(humanoid, TAG .. " Humanoid not found in " .. state.ownerCharacter.Name)
+	assert(humanoid:IsA("Humanoid"), TAG .. " Humanoid is not a Humanoid instance")
 
 	state.ownerHumanoid = humanoid :: Humanoid
 	return true

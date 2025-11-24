@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	MessageDisplay Module
+
+	Displays Robux transaction messages in system chat.
+	Returns a table with displayRobuxTransaction method.
+
+	Usage:
+		MessageDisplay.displayRobuxTransaction("Player1", "Player2", "sent", 1000, false)
+]]
+
 --------------
 -- Services --
 --------------
@@ -14,14 +24,15 @@ local ROBUX_CURRENCY_COLOR: string = "#ffb46a"
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found")
 
 local FormatString = require(Modules.Utilities.FormatString)
 local RainbowifyString = require(Modules.Utilities.RainbowifyString)
 local GameConfig = require(Configuration.GameConfig)
 
-local systemChatChannel: TextChannel = TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXSystem") :: TextChannel
+local textChannels = assert(TextChatService:WaitForChild("TextChannels", 10), "TextChannels not found")
+local systemChatChannel: TextChannel = assert(textChannels:WaitForChild("RBXSystem", 10), "RBXSystem channel not found") :: TextChannel
 
 -----------
 -- Module --

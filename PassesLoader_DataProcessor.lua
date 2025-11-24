@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	PassesLoader_DataProcessor - Data validation and transformation for API responses
+
+	What it does:
+	- Validates gamepass data structures from API responses
+	- Filters invalid/free gamepasses (only paid passes)
+	- Transforms raw API data into structured GamepassData
+	- Validates games API response structure
+	- Extracts and validates game IDs from game data
+
+	Returns: Module table with functions:
+	- isValidGamepassData(gamepassInfo) - Validates gamepass structure
+	- processGamepasses(rawData) - Transforms gamepass array
+	- validateGamepassResponse(decodedData, universeId) - Validates API response
+	- processGames(rawGameData) - Extracts game IDs
+	- validateGamesResponse(decodedData, playerId) - Validates games API response
+
+	Usage:
+	local DataProcessor = require(script.DataProcessor)
+	local result = DataProcessor.processGamepasses(apiData.gamePasses)
+	-- result = { gamepasses = {...}, skippedCount = 5 }
+]]
+
 -----------
 -- Types --
 -----------

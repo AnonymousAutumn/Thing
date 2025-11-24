@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	Connect4_GameController_TokenFactory
+
+	Creates and manages Connect4 game tokens with animations and visual effects.
+	Handles token instantiation, placement, drop animations, and victory effects.
+
+	Returns: Table with factory functions:
+		- createToken: Creates and animates a token drop with team color
+		- applyVictoryEffects: Applies neon/transparency effects to winning tokens
+
+	Usage:
+		local TokenFactory = require(script.Connect4_GameController_TokenFactory)
+		local token = TokenFactory.createToken(container, {
+			column = 3,
+			row = 2,
+			teamIndex = 0,
+			triggerPosition = Vector3.new(5, 10, 0),
+			basePlateYPosition = 0,
+			tokenHeight = 1
+		})
+		TokenFactory.applyVictoryEffects(token)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,9 +32,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local objects = instances:WaitForChild("Objects")
-local tokenPrefab = objects:WaitForChild("Token")
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Instances folder not found in ReplicatedStorage")
+local objects = assert(instances:WaitForChild("Objects", 10), "Objects folder not found in Instances")
+local tokenPrefab = assert(objects:WaitForChild("Token", 10), "Token prefab not found in Objects")
 
 -----------
 -- Types --
@@ -70,6 +93,9 @@ end
 	@return Part? - Created token part (or nil if invalid position)
 ]]
 function TokenFactory.createToken(container: Instance, config: TokenConfig): Part?
+	assert(typeof(container) == "Instance", "container must be an Instance")
+	assert(typeof(config) == "table", "config must be a table")
+
 	if not config.triggerPosition then
 		return nil
 	end
@@ -104,6 +130,8 @@ end
 	@param token Part - Token to apply effects to
 ]]
 function TokenFactory.applyVictoryEffects(token: Part): ()
+	assert(typeof(token) == "Instance" and token:IsA("BasePart"), "token must be a BasePart")
+
 	token.Material = Enum.Material.Neon
 	token.Transparency = 0.25
 end

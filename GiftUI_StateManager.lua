@@ -1,14 +1,35 @@
 --!strict
 
+--[[
+	GiftUI_StateManager - State management for gift UI
+
+	This module manages gift UI state and notification badges:
+	- Updates gift notification badge display
+	- Triggers text-to-speech notifications
+	- Resets gift state when needed
+
+	Returns: StateManager module with state management functions
+
+	Usage:
+		StateManager.safeExecute = yourSafeExecuteFunction
+		StateManager.updateGiftNotificationBadgeDisplay(badgeElements, unreadCount)
+		StateManager.resetGiftState(state)
+]]
+
 --------------
 -- Services --
 --------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+---------------
+-- Constants --
+---------------
+local WAIT_TIMEOUT = 10
+
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), "GiftUI_StateManager: Modules folder not found")
 local TextToSpeech = require(Modules.Utilities.TextToSpeech)
 
 -----------
@@ -35,6 +56,10 @@ StateManager.safeExecute = nil :: (((() -> ()) -> boolean))?
 	@param unreadGiftCount number - Number of unread gifts
 ]]
 function StateManager.updateGiftNotificationBadgeDisplay(badgeElements: BadgeElements, unreadGiftCount: number): ()
+	assert(badgeElements, "StateManager.updateGiftNotificationBadgeDisplay: badgeElements is required")
+	assert(typeof(unreadGiftCount) == "number", "StateManager.updateGiftNotificationBadgeDisplay: unreadGiftCount must be a number")
+	assert(unreadGiftCount >= 0, "StateManager.updateGiftNotificationBadgeDisplay: unreadGiftCount must be non-negative")
+
 	if not StateManager.safeExecute then
 		return
 	end
@@ -59,6 +84,8 @@ end
 	@param state any - GiftUIState object to reset
 ]]
 function StateManager.resetGiftState(state: any): ()
+	assert(state, "StateManager.resetGiftState: state is required")
+
 	state.currentUnreadGiftCount = 0
 	table.clear(state.cachedGiftDataFromServer)
 	table.clear(state.activeGiftTimeDisplayEntries)

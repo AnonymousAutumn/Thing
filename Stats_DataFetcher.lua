@@ -1,10 +1,23 @@
 --!strict
 
+--[[
+	Stats DataFetcher Module
+
+	Handles leaderboard data retrieval from OrderedDataStores.
+	Provides retry logic and data validation for leaderboard entries.
+
+	Returns: DataFetcher table with data retrieval functions
+
+	Usage:
+		local DataFetcher = require(...)
+		local success, data = DataFetcher.retrieveLeaderboardData(dataStore, count, config)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local RetryAsync = require(Modules.Utilities.RetryAsync)
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local Populater = require(script.Parent.Populater)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local RetryAsync = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("RetryAsync", 10), "Failed to find RetryAsync"))
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local Populater = require(assert(script.Parent:WaitForChild("Populater", 10), "Failed to find Populater"))
 
 ---------------
 -- Constants --

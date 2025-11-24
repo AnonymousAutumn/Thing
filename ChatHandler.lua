@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	ChatHandler Module
+
+	Manages player chat tags with gradient support and custom formatting.
+	Returns nothing - executes automatically when required.
+
+	Usage:
+		Automatically hooks into TextChatService.OnIncomingMessage.
+]]
+
 --------------
 -- Services --
 --------------
@@ -24,12 +34,12 @@ local LOG_PREFIX: string = "[ChatHandler]"
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local sendMessageEvent = remoteEvents:WaitForChild("SendMessage")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found")
+local sendMessageEvent = assert(remoteEvents:WaitForChild("SendMessage", 10), "SendMessage event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 

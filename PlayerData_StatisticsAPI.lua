@@ -1,5 +1,29 @@
 --!strict
 
+--[[
+	PlayerData_StatisticsAPI - High-level API for player statistic operations
+
+	What it does:
+	- Provides high-level functions for statistic updates (increment, set, get)
+	- Manages cache-first data access with DataStore fallback
+	- Implements debounced save system (15 second delay)
+	- Coordinates UI updates and cross-server message publishing
+	- Validates all inputs (userId, statistic name, values)
+	- Uses dependency injection for DataCache, DataStore, CrossServerMessaging
+
+	Returns: Module table with functions:
+	- updatePlayerStatistic(userId, stat, amount, isAbsolute, isRemote?) - Main update function
+	- incrementPlayerStatistic(userId, stat, amount, isRemote?) - Increments stat
+	- setPlayerStatisticAbsoluteValue(userId, stat, value, isRemote?) - Sets stat
+	- getPlayerStatisticValue(userId, stat) - Gets stat value
+	- setDataCacheModule(module) / setDataStoreModule(module) / setCrossServerMessagingModule(module) - DI
+
+	Usage:
+	local StatisticsAPI = require(script.StatisticsAPI)
+	StatisticsAPI.setDataCacheModule(DataCache)
+	StatisticsAPI.incrementPlayerStatistic(userId, "Donated", 100)
+]]
+
 --------------
 -- Services --
 --------------
@@ -10,7 +34,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(modules.Utilities.ValidationUtils)
 
 -----------
@@ -98,6 +122,11 @@ function StatisticsAPI.updatePlayerStatistic(
 	shouldSetAbsoluteValue: boolean,
 	isRemoteUpdate: boolean?
 ): ()
+	assert(playerUserId ~= nil, "playerUserId cannot be nil")
+	assert(typeof(statisticName) == "string" and #statisticName > 0, "statisticName must be a non-empty string")
+	assert(typeof(statisticAmount) == "number", "statisticAmount must be a number")
+	assert(typeof(shouldSetAbsoluteValue) == "boolean", "shouldSetAbsoluteValue must be a boolean")
+
 	local playerUserIdString: string = tostring(playerUserId)
 	local playerUserIdNumber: number? = tonumber(playerUserId)
 

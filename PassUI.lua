@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Pass UI (GamePass Shop Interface)
+
+	Manages the in-game gamepass shop UI including button interactions, shop animations,
+	purchase prompts, and dynamic content. Handles opening/closing animations, item
+	display updates, and purchase flow integration.
+
+	Returns: nil (auto-initializes on require)
+
+	Usage:
+		Require this module in a LocalScript parented to the GamePass shop ScreenGui.
+		The system will automatically set up button handlers and shop animations.
+]]
+
 --------------
 -- Services --
 --------------
@@ -32,13 +46,13 @@ type GamePassProductInfo = {
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network")
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Failed to find Bindables in Network")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Failed to find Events in Bindables")
 
-local sendNotificationEvent = bindableEvents:WaitForChild("CreateNotification")
+local sendNotificationEvent = assert(bindableEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification BindableEvent")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
 local PurchaseWrapper = require(Modules.Wrappers.Purchases)
 local ButtonWrapper = require(Modules.Wrappers.Buttons)
 local InputCategorizer = require(Modules.Utilities.InputCategorizer)
@@ -46,12 +60,12 @@ local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local NotificationHelper = require(Modules.Utilities.NotificationHelper)
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
-local uiSounds : SoundGroup = SoundService:WaitForChild("UI")
-local feedbackSounds : SoundGroup = SoundService:WaitForChild("Feedback")
+local uiSounds : SoundGroup = assert(SoundService:WaitForChild("UI", 10), "Failed to find UI SoundGroup in SoundService")
+local feedbackSounds : SoundGroup = assert(SoundService:WaitForChild("Feedback", 10), "Failed to find Feedback SoundGroup in SoundService")
 
-local gamePassShopMainFrame = script.Parent:WaitForChild("MainFrame")
-local gamePassItemsDisplayFrame = gamePassShopMainFrame:WaitForChild("ItemFrame")
-local gamePassItemsLayoutManager = gamePassItemsDisplayFrame:WaitForChild("UIListLayout")
+local gamePassShopMainFrame = assert(script.Parent:WaitForChild("MainFrame", 10), "Failed to find MainFrame in PassUI parent")
+local gamePassItemsDisplayFrame = assert(gamePassShopMainFrame:WaitForChild("ItemFrame", 10), "Failed to find ItemFrame in MainFrame")
+local gamePassItemsLayoutManager = assert(gamePassItemsDisplayFrame:WaitForChild("UIListLayout", 10), "Failed to find UIListLayout in ItemFrame")
 
 local localPlayer = Players.LocalPlayer
 
@@ -148,7 +162,9 @@ local function clearAllGamePassItemsFromDisplay()
 end
 
 local function handleGamePassPurchaseButtonInteraction(button)
+	assert(button, "button cannot be nil")
 	local assetId = button:GetAttribute("AssetId")
+	assert(assetId, "Button AssetId attribute is missing")
 
 	PurchaseWrapper.attemptPurchase({
 		player = localPlayer,
@@ -165,11 +181,12 @@ local function handleGamePassPurchaseButtonInteraction(button)
 end
 
 local function setupGamePassButtonInteractionHandlers(gamePassButton)
+	assert(gamePassButton, "gamePassButton cannot be nil")
 	ButtonWrapper.setupButton({
 		button = gamePassButton,
 		onClick = handleGamePassPurchaseButtonInteraction,
 		sounds = {
-			hover = uiSounds:WaitForChild("Hover"),
+			hover = assert(uiSounds:WaitForChild("Hover", 10), "Failed to find Hover sound in UI SoundGroup"),
 		},
 		connectionTracker = resourceManager,
 	})
@@ -180,7 +197,8 @@ local function handleShopOpening()
 end
 
 local function handleShopClosing()
-	uiSounds:WaitForChild("Close"):Play()
+	local closeSound = assert(uiSounds:WaitForChild("Close", 10), "Failed to find Close sound in UI SoundGroup")
+	closeSound:Play()
 	clearAllGamePassItemsFromDisplay()
 end
 

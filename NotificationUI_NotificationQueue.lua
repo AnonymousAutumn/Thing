@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	Notification UI - Queue
+
+	Manages the queue of active notification frames. Handles adding, removing,
+	and tracking notification frames, as well as scheduling automatic removal
+	after the display duration expires.
+
+	Returns: NotificationQueue (module table with constructor)
+
+	Usage:
+		local queue = NotificationQueue.new()
+		queue:add(frame)
+		queue:remove(frame)
+		queue:scheduleRemoval(frame, textLabel, onRemoveCallback)
+		local count = queue:getCount()
+]]
+
 ---------------
 -- Constants --
 ---------------

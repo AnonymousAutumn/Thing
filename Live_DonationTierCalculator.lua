@@ -1,7 +1,21 @@
 --!strict
 
+--[[
+	Donation Tier Calculator
+
+	Determines donation tier information (level, lifetime, color) based on donation amount.
+	Uses configured thresholds to categorize donations into tiers and identify high-tier
+	donations that receive special display treatment.
+
+	Returns: DonationTierCalculator (module table with tier functions)
+
+	Usage:
+		local tierInfo = DonationTierCalculator.determineTierInfo(amount)
+		local isHighTier = DonationTierCalculator.isHighTier(tierInfo)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 local GameConfig = require(Configuration.GameConfig)
 
 ---------------

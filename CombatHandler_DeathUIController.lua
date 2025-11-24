@@ -1,8 +1,18 @@
 --!strict
 
+--[[
+	DeathUIController Module
+
+	Displays animated death UI when player is eliminated in combat.
+	Returns a function that displays the death UI animation.
+
+	Usage:
+		DeathUIController(guiTemplate, player)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 local TweenHelper = require(Modules.Utilities.TweenHelper)
 
 -- Track last animation start per player so newer ones cancel older ones for that player

@@ -1,5 +1,27 @@
 --!strict
 
+--[[
+	PlayerManager - Main player initialization and lifecycle coordinator
+
+	What it does:
+	- Handles player join/leave events
+	- Initializes player data systems (statistics, gamepasses, leaderboards)
+	- Manages initialization state tracking with timeout protection
+	- Coordinates cross-server leaderboard update synchronization
+	- Implements graceful shutdown with data save
+	- Kicks players on initialization failures with descriptive messages
+	- Manages OrderedDataStore registry for leaderboards
+
+	Returns: N/A (Event-driven module, no return value)
+
+	Usage:
+	- Automatically initializes on require()
+	- Processes existing players in server
+	- Handles PlayerAdded/PlayerRemoving events
+	- Subscribes to cross-server leaderboard updates
+	- Saves all data on game shutdown
+]]
+
 --------------
 -- Services --
 --------------
@@ -10,16 +32,16 @@ local Players = game:GetService("Players")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network") :: Folder
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
-local signals = network:WaitForChild("Signals")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Bindables folder not found in Network")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Events folder not found in Bindables")
+local signals = assert(network:WaitForChild("Signals", 10), "Signals folder not found in Network")
 
-local updateUI = bindableEvents:WaitForChild("UpdateUI")
-local dataLoaded = signals:WaitForChild("DataLoaded")
+local updateUI = assert(bindableEvents:WaitForChild("UpdateUI", 10), "UpdateUI event not found")
+local dataLoaded = assert(signals:WaitForChild("DataLoaded", 10), "DataLoaded signal not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local PlayerData = require(Modules.Managers.PlayerData)
 local GamepassCacheManager = require(Modules.Caches.PassCache)

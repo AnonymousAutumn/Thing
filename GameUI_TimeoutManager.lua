@@ -1,7 +1,23 @@
 --!strict
 
+--[[
+	GameUI_TimeoutManager
+
+	Manages turn timeout countdown display with cancellation support.
+	Displays "Time Left: X" countdown and handles timeout finalization.
+
+	Returns: Table with timeout management functions:
+		- createTimeoutHandler: Creates a cancellable timeout countdown
+		- cancelTimeoutHandler: Cancels the active timeout
+
+	Usage:
+		local TimeoutManager = require(script.GameUI_TimeoutManager)
+		local handler = TimeoutManager.createTimeoutHandler(30, "Time's up!")
+		-- Later: handler.cancel() or TimeoutManager.cancelTimeoutHandler()
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 local GameStateManager = require(script.Parent.GameStateManager)

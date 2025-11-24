@@ -1,5 +1,22 @@
 --!strict
 
+--[[
+	Connect4_GameController_WinDetection
+
+	Detects winning conditions in Connect4 by checking for 4 consecutive tokens
+	in horizontal, vertical, and diagonal directions.
+
+	Returns: Table with win detection function:
+		- checkWin: Analyzes board state after a token placement to determine if a win occurred
+
+	Usage:
+		local WinDetection = require(script.Connect4_GameController_WinDetection)
+		local result = WinDetection.checkWin(boardState, column, row, teamIndex)
+		if result.hasWon then
+			print("Win detected at positions:", result.winningPositions)
+		end
+]]
+
 -----------
 -- Types --
 -----------
@@ -47,6 +64,11 @@ function WinDetection.checkWin(
 	row: number,
 	teamIndex: number
 ): WinResult
+	assert(typeof(boardState) == "table", "boardState must be a table")
+	assert(typeof(column) == "number" and column > 0, "column must be a positive number")
+	assert(typeof(row) == "number" and row > 0, "row must be a positive number")
+	assert(typeof(teamIndex) == "number", "teamIndex must be a number")
+
 	for _, direction in DIRECTIONS do
 		local dx, dy = direction[1], direction[2]
 		local count = 1

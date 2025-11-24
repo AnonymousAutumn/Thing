@@ -1,7 +1,26 @@
 --!strict
 
+--[[
+	GameUI_GameStateManager
+
+	Manages game UI state including timeout sequences, status visibility, and resource cleanup.
+	Centralizes state management for the GameUI module hierarchy.
+
+	Returns: Table with state management functions:
+		- trackConnection, trackTween, trackTask: Resource tracking
+		- cancelAllTweens, cancelAllTasks, disconnectAllConnections: Cleanup
+		- incrementTimeoutSequence, incrementStatusSequence: Sequence management
+		- resetState: Resets UI state variables
+
+	Usage:
+		local GameStateManager = require(script.GameUI_GameStateManager)
+		GameStateManager.trackConnection(event:Connect(handler))
+		GameStateManager.incrementTimeoutSequence()
+		GameStateManager.cancelAllTasks()
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 -----------

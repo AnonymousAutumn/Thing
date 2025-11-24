@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	ValidationUtils Module
+
+	Provides comprehensive validation functions for all data types.
+	Validates players, UI elements, numbers, strings, and more.
+
+	Returns: ValidationUtils table with validation functions
+
+	Usage:
+		local ValidationUtils = require(...)
+		if ValidationUtils.isValidPlayer(player) then ... end
+]]
+
 --------------
 -- Services --
 --------------

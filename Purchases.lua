@@ -1,5 +1,24 @@
 --!strict
 
+--[[
+	Purchases Module
+
+	Handles gamepass and developer product purchase flows with full validation.
+	Provides purchase prompting, ownership verification, and error handling.
+
+	Returns: GamePassPurchaseHandler table with purchase management functions
+
+	Usage:
+		local Purchases = require(...)
+		local result = Purchases.attemptPurchase({
+			player = player,
+			assetId = 123456,
+			isDevProduct = false,
+			onSuccess = function() ... end,
+			onError = function(errorType, message) ... end
+		})
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,8 +31,8 @@ local Players = game:GetService("Players")
 -- Modules  --
 --------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local validationUtils = require(modules.Utilities.ValidationUtils)
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local validationUtils = require(assert(modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils module"))
 
 -----------
 -- Types --
@@ -170,6 +189,12 @@ local GamePassPurchaseHandler = {}
 	@return PurchaseResult - Result of the purchase attempt
 ]]
 function GamePassPurchaseHandler.attemptPurchase(config: PurchaseConfig): PurchaseResult
+	-- Input validation
+	assert(config, "PurchaseConfig is required")
+	assert(validationUtils.isValidPlayer(config.player), "Valid player is required")
+	assert(type(config.assetId) == "number", "Asset ID must be a number")
+	assert(type(config.isDevProduct) == "boolean", "isDevProduct must be a boolean")
+
 	-- Early validation: Check if already processing
 	if isPurchaseCurrentlyProcessing then
 		return {

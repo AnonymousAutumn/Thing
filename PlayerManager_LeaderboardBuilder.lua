@@ -1,5 +1,29 @@
 --!strict
 
+--[[
+	PlayerManager_LeaderboardBuilder - Player leaderboard UI construction
+
+	What it does:
+	- Creates leaderstats folder and IntValue children for each tracked statistic
+	- Sets display priority using NumberValue children for custom sorting
+	- Loads initial statistic values from PlayerData system
+	- Provides accessor functions for leaderstats folder and stat objects
+	- Validates leaderboard creation success
+
+	Returns: Module table with functions:
+	- createLeaderboard(player) - Creates complete leaderboard for player (returns success boolean)
+	- getLeaderstatsFolder(player) - Gets player's leaderstats folder
+	- getStatisticObject(folder, stat) - Gets specific statistic IntValue
+
+	Usage:
+	local LeaderboardBuilder = require(script.LeaderboardBuilder)
+	local success = LeaderboardBuilder.createLeaderboard(player)
+	if success then
+		local folder = LeaderboardBuilder.getLeaderstatsFolder(player)
+		local donated = LeaderboardBuilder.getStatisticObject(folder, "Donated")
+	end
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,7 +32,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local PlayerData = require(Modules.Managers.PlayerData)
 
 ---------------
@@ -143,7 +167,8 @@ end
 	@return Folder? - Leaderstats folder or nil
 ]]
 function LeaderboardBuilder.getLeaderstatsFolder(player: Player): Folder?
-	return player:WaitForChild("leaderstats")
+	assert(player and player:IsA("Player"), "player must be a valid Player instance")
+	return player:WaitForChild("leaderstats", 10)
 end
 
 --[[
@@ -154,6 +179,9 @@ end
 	@return IntValue? - Statistic value object or nil
 ]]
 function LeaderboardBuilder.getStatisticObject(leaderboardFolder: Folder, statisticName: string): IntValue?
+	assert(leaderboardFolder and leaderboardFolder:IsA("Folder"), "leaderboardFolder must be a valid Folder instance")
+	assert(typeof(statisticName) == "string" and #statisticName > 0, "statisticName must be a non-empty string")
+
 	local statObject = leaderboardFolder:FindFirstChild(statisticName)
 	if not statObject or not statObject:IsA("IntValue") then
 		return nil

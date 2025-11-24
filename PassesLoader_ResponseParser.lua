@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	PassesLoader_ResponseParser - JSON response parser and error extractor
+
+	What it does:
+	- Safely decodes JSON responses from HTTP requests
+	- Extracts and categorizes API errors from response data
+	- Supports multiple error formats (Errors array, error field)
+	- Validates response data presence
+
+	Returns: Module table with functions:
+	- parseResponse(responseData) - Parses HTTP response
+		Returns: ParseResult { success, errorMessage, data? }
+
+	Usage:
+	local ResponseParser = require(script.ResponseParser)
+	local result = ResponseParser.parseResponse(httpResponseData)
+	if result.success then
+		-- Process result.data
+	else
+		warn("API Error: " .. result.errorMessage)
+	end
+]]
+
 --------------
 -- Services --
 --------------

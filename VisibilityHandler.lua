@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	VisibilityHandler Script
+
+	Client-side player visibility and control management.
+	Handles hiding/showing players and enabling/disabling controls during turns.
+
+	Returns: Nothing (client-side script)
+
+	Usage: Runs automatically when placed in game
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,8 +22,8 @@ local Players = game:GetService("Players")
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
 
 ---------------
 -- Constants --
@@ -209,9 +220,9 @@ end
 --------------------
 local function initializePlayerControls(): ()
 	-- PlayerModule is provided by Roblox; protect with pcall
-	local playerScripts = localPlayer:WaitForChild("PlayerScripts")
+	local playerScripts = assert(localPlayer:WaitForChild("PlayerScripts", 10), "Failed to find PlayerScripts")
 	local moduleSuccess, playerModule = pcall(function()
-		return playerScripts:WaitForChild("PlayerModule")
+		return playerScripts:WaitForChild("PlayerModule", 10)
 	end)
 	if not moduleSuccess or not playerModule then
 		warn("Failed to access PlayerModule: ", tostring(playerModule))
@@ -237,10 +248,10 @@ local function initializePlayerControls(): ()
 end
 
 local function initializeNetworkEvents(): ()
-	local network : Folder = ReplicatedStorage:WaitForChild("Network")
-	local remotes = network:WaitForChild("Remotes")
-	local remoteEvents = remotes:WaitForChild("Events")
-	local updateGameUIEvent = remoteEvents:WaitForChild("UpdateGameUI")
+	local network : Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+	local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+	local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events")
+	local updateGameUIEvent = assert(remoteEvents:WaitForChild("UpdateGameUI", 10), "Failed to find UpdateGameUI")
 
 	resourceManager:trackConnection(updateGameUIEvent.OnClientEvent:Connect(onTurnUIUpdate))
 end

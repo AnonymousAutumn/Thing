@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	TagResolver Module
+
+	Determines chat tags for messages based on player status (creator, tester, server).
+	Returns a table with getChatTagProperties method.
+
+	Usage:
+		local gradient, tagName = TagResolver.getChatTagProperties(message)
+]]
+
 --------------
 -- Services --
 --------------
@@ -10,7 +20,7 @@ local TextChatService = game:GetService("TextChatService")
 ----------------
 -- References --
 ----------------
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found")
 local tagConfig = Configuration.TagConfig
 
 -----------

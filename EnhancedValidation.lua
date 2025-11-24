@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	EnhancedValidation
+
+	Provides comprehensive input validation for RemoteEvent arguments with type checking,
+	bounds validation, NaN/Infinity detection, and security helpers for player actions.
+
+	Returns: Table with validation functions:
+		- validateRemoteArgs: Validates multiple RemoteEvent arguments
+		- validatePlayer, validateNumber, validateString: Type-specific validators
+		- validatePositiveInteger, validateUserId: Common pattern validators
+		- validateVector3, validateCFrame: Geometric type validators
+		- isActionPhysicallyPossible: Security helper for distance checks
+
+	Usage:
+		local EnhancedValidation = require(script.EnhancedValidation)
+		if not EnhancedValidation.validateRemoteArgs(player, {
+			{column, "number", {min = 1, max = 7}},
+			{message, "string", {maxLength = 100}}
+		}) then
+			return -- Invalid input
+		end
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,7 +31,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 -----------

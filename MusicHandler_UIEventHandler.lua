@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	Music Handler - UI Event Handler
+
+	Manages UI event connections for the music player interface including
+	volume slider drag events and next/previous track button clicks.
+	Handles input position calculations and drag state management.
+
+	Returns: UIEventHandler (module table with event setup functions)
+
+	Usage:
+		UIEventHandler.setupEventConnections(uiElements, resourceManager, musicTracks)
+		-- Set callbacks before use:
+		UIEventHandler.updateVolumeCallback = function(volume) ... end
+		UIEventHandler.playNextTrackCallback = function() ... end
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,7 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 ---------------

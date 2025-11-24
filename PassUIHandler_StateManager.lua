@@ -1,7 +1,31 @@
 --!strict
 
+--[[
+	PassUIHandler_StateManager - Player UI state tracking and resource cleanup
+
+	What it does:
+	- Manages per-player UI state (connections, tweens, cooldown threads, gifting flag)
+	- Tracks connections and tweens for automatic cleanup
+	- Provides state lifecycle management (create, track, cleanup)
+	- Handles cooldown state registry
+
+	Returns: Module table with functions:
+	- getOrCreatePlayerUIState(player) - Gets/creates player state
+	- trackPlayerConnection(player, connection) - Tracks connection for cleanup
+	- trackPlayerTween(player, tween) - Tracks tween for cleanup
+	- cleanupPlayerResources(player, preserveCooldown) - Cleans up player resources
+	- cleanupAllStates() - Cleans up all states (shutdown)
+	- isPlayerOnCooldown(player) - Checks cooldown status
+	- getPlayerUIState(player) - Gets existing state
+
+	Usage:
+	local StateManager = require(script.StateManager)
+	StateManager.playerUIStates = {}  -- Inject shared registries
+	local state = StateManager.getOrCreatePlayerUIState(player)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 -----------

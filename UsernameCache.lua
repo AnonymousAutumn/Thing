@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	UsernameCache Module
+
+	Caches username lookups to reduce API calls.
+	Provides efficient username resolution with retry logic and TTL.
+
+	Returns: UsernameCache table with caching functions
+
+	Usage:
+		local UsernameCache = require(...)
+		local username = UsernameCache.getUsername(userId)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,9 +22,9 @@ local Players = game:GetService("Players")
 ----------------
 -- References --
 ----------------
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local validationUtils = require(modules.Utilities.ValidationUtils)
-local CacheManager = require(modules.Wrappers.Cache)
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local validationUtils = require(assert(modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local CacheManager = require(assert(modules:WaitForChild("Wrappers", 10):WaitForChild("Cache", 10), "Failed to find Cache"))
 
 -----------
 -- Types --

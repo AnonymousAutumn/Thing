@@ -1,5 +1,27 @@
 --!strict
 
+--[[
+	PassUIHandler_DisplayRenderer - Gamepass display and rendering logic
+
+	What it does:
+	- Builds gamepass UI templates from data
+	- Renders gamepasses into scroll frame with proper formatting
+	- Manages empty state visibility and messaging
+	- Truncates gamepass lists to display limits
+	- Validates gamepass data structures
+
+	Returns: Module table with functions:
+	- truncateGamepassList(gamepasses) - Limits gamepass count
+	- configureEmptyStateVisibility(ui, gamepasses, isOwner) - Shows/hides empty state
+	- configureEmptyStateMessages(ui, playerData, count) - Sets empty state text
+	- shouldShowLoadingLabel(ui, gamepasses, isOwn, context) - Determines loading visibility
+	- displayGamepasses(scrollFrame, gamepasses, viewer, userId) - Renders gamepass list
+
+	Usage:
+	local DisplayRenderer = require(script.DisplayRenderer)
+	DisplayRenderer.displayGamepasses(scrollFrame, gamepasses, player, userId)
+]]
+
 --------------
 -- Services --
 --------------
@@ -10,17 +32,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local FormatString = require(Modules.Utilities.FormatString)
 local PassUIUtilities = require(Modules.Utilities.PassUIUtilities)
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 local GameConfig = require(Configuration.GameConfig)
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs = instances:WaitForChild("GuiPrefabs")
-local passButtonPrefab = guiPrefabs:WaitForChild("PassButtonPrefab")
+local instances = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Instances folder not found in ReplicatedStorage")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "GuiPrefabs folder not found in Instances")
+local passButtonPrefab = assert(guiPrefabs:WaitForChild("PassButtonPrefab", 10), "PassButtonPrefab not found in GuiPrefabs")
 
 -----------
 -- Types --

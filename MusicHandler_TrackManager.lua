@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	Music Handler - Track Manager
+
+	Manages music track playback, sound instance creation, track validation,
+	and sound event handling. Validates track approval before playback and
+	handles automatic track progression.
+
+	Returns: TrackManager (module table with track management functions)
+
+	Usage:
+		TrackManager.createSound(trackData, parent, volume, maxVolume)
+		TrackManager.setupSoundEvents(sound, trackData, state, playFunction)
+		TrackManager.isApprovedSound(trackData, testParent)
+		TrackManager.stopCurrentTrack(state)
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,7 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 ---------------

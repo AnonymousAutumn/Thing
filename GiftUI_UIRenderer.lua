@@ -1,31 +1,37 @@
 --!strict
 
+--[[
+	GiftUI_UIRenderer - UI rendering for gift display
+
+	This module handles rendering and updating gift UI elements:
+	- Creates gift display frames from server data
+	- Updates existing gift displays with new timestamps
+	- Removes invalid gift frames
+	- Manages time display entries for continuous updates
+
+	Returns: UIRenderer module with UI population functions
+
+	Usage:
+		UIRenderer.populateGiftDisplayWithServerData(
+			serverGiftDataList,
+			uiRefs,
+			timeDisplayEntries,
+			safeExecute
+		)
+]]
+
 --------------
 -- Services --
 --------------
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
------------
--- Types --
------------
-
-local TimeFormatter = require(script.Parent:WaitForChild("TimeFormatter"))
-local ValidationHandler = require(script.Parent:WaitForChild("ValidationHandler"))
-
-type GiftData = ValidationHandler.GiftData
-type TimeDisplayEntry = TimeFormatter.TimeDisplayEntry
-
-type UIReferences = {
-	giftReceivedPrefab: CanvasGroup,
-	giftEntriesScrollingFrame: ScrollingFrame,
-}
-
 ---------------
 -- Constants --
 ---------------
 
 local TAG = "[GiftUI.UIRenderer]"
+local WAIT_TIMEOUT = 10
 
 local MESSAGE_FORMAT_GIFT = "%s gifted you %s!"
 local GIFT_ID_PREFIX = "Gift_"
@@ -34,11 +40,26 @@ local GIFT_ID_PREFIX = "Gift_"
 -- References --
 ----------------
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", WAIT_TIMEOUT), TAG .. " Configuration folder not found")
 
 local FormatString = require(Modules.Utilities.FormatString)
 local GameConfig = require(Configuration.GameConfig)
+
+-----------
+-- Types --
+-----------
+
+local TimeFormatter = require(assert(script.Parent:WaitForChild("TimeFormatter", WAIT_TIMEOUT), TAG .. " TimeFormatter not found"))
+local ValidationHandler = require(assert(script.Parent:WaitForChild("ValidationHandler", WAIT_TIMEOUT), TAG .. " ValidationHandler not found"))
+
+type GiftData = ValidationHandler.GiftData
+type TimeDisplayEntry = TimeFormatter.TimeDisplayEntry
+
+type UIReferences = {
+	giftReceivedPrefab: CanvasGroup,
+	giftEntriesScrollingFrame: ScrollingFrame,
+}
 
 ---------------
 -- Functions --
@@ -180,6 +201,13 @@ local function populateGiftDisplayWithServerData(
 	timeDisplayEntries: { TimeDisplayEntry },
 	safeExecute: (func: () -> (), errorMessage: string) -> boolean
 ): ()
+	assert(serverGiftDataList, "populateGiftDisplayWithServerData: serverGiftDataList is required")
+	assert(typeof(serverGiftDataList) == "table", "populateGiftDisplayWithServerData: serverGiftDataList must be a table")
+	assert(uiRefs, "populateGiftDisplayWithServerData: uiRefs is required")
+	assert(timeDisplayEntries, "populateGiftDisplayWithServerData: timeDisplayEntries is required")
+	assert(typeof(timeDisplayEntries) == "table", "populateGiftDisplayWithServerData: timeDisplayEntries must be a table")
+	assert(safeExecute, "populateGiftDisplayWithServerData: safeExecute is required")
+
 	local validGiftIdentifierKeys = {}
 	local existingGiftDisplayFrames = collectExistingGiftFrames(uiRefs)
 

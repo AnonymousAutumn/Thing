@@ -1,9 +1,19 @@
 --!strict
 
+--[[
+	TextFormatter Module
+
+	Provides text formatting utilities for chat tags.
+	Returns a table with stripRichTextTags, countFormatPlaceholders, and formatWithTemplate methods.
+
+	Usage:
+		local plain = TextFormatter.stripRichTextTags(richText)
+]]
+
 ---------------
 -- Constants --
 ---------------
-local RICH_TEXT_TAG_PATTERN: string = "(<[^<>]->)"
+local RICH_TEXT_TAG_PATTERN: string = "(<[^<>]-<>)"
 local DEFAULT_TEXT_COLOR: string = "#FFFFFF"
 
 -----------

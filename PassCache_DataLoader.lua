@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	PassCache - Data Loader
+
+	Handles fetching player gamepass and game ownership data from external APIs
+	with retry logic. Manages API request attempts, retry delays, and cache
+	clearing operations with timeout protection.
+
+	Returns: DataLoader (module table with data fetching functions)
+
+	Usage:
+		DataLoader.initialize({ passesLoader, createEmptyEntry, warnlog })
+		local success, entry = DataLoader.fetchPlayerDataSafely(userId, retries, delay)
+		local cleared = DataLoader.waitForCacheClear(cache, player, timeout, interval, warnlog)
+]]
+
 local DataLoader = {}
 
 -----------
@@ -32,6 +47,11 @@ local TAG = "[DataLoader]"
 local deps: LoaderDependencies = nil :: any
 
 function DataLoader.initialize(dependencies: LoaderDependencies): ()
+	assert(dependencies, "dependencies cannot be nil")
+	assert(dependencies.passesLoader, "dependencies.passesLoader cannot be nil")
+	assert(dependencies.createEmptyEntry, "dependencies.createEmptyEntry cannot be nil")
+	assert(dependencies.warnlog, "dependencies.warnlog cannot be nil")
+
 	deps = dependencies
 end
 
@@ -40,6 +60,13 @@ function DataLoader.fetchPlayerDataSafely(
 	retryAttempts: number,
 	retryDelay: number
 ): (boolean, PlayerDataCacheEntry?)
+	assert(userId, "userId cannot be nil")
+	assert(type(userId) == "number", "userId must be a number")
+	assert(retryAttempts, "retryAttempts cannot be nil")
+	assert(type(retryAttempts) == "number", "retryAttempts must be a number")
+	assert(retryDelay, "retryDelay cannot be nil")
+	assert(type(retryDelay) == "number", "retryDelay must be a number")
+
 	local lastError: any = nil
 
 	for attempt = 1, retryAttempts do

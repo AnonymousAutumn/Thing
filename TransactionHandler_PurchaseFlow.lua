@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	TransactionHandler PurchaseFlow Module
+
+	Orchestrates gamepass purchase completion flow.
+	Handles post-purchase processing, gift saving, and notifications.
+
+	Returns: PurchaseFlow table with purchase handling functions
+
+	Usage:
+		local PurchaseFlow = require(...)
+		PurchaseFlow.handleGamepassPurchaseCompletion(player, assetId, success)
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,15 +25,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local Network = ReplicatedStorage:WaitForChild("Network")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
 
-local SendNotificationEvent = Network.Remotes.Events.CreateNotification
+local SendNotificationEvent = assert(Network:WaitForChild("Remotes", 10):WaitForChild("Events", 10):WaitForChild("CreateNotification", 10), "Failed to find CreateNotification")
 
-local UsernameCache = require(Modules.Caches.UsernameCache)
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local GameConfig = require(Configuration.GameConfig)
+local UsernameCache = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("UsernameCache", 10), "Failed to find UsernameCache"))
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
 -----------
 -- Types --

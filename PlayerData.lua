@@ -1,5 +1,32 @@
 --!strict
 
+--[[
+	PlayerData - Main coordinator for player statistics and data persistence
+
+	What it does:
+	- Manages player statistics (Donated, Raised, Wins) with caching and persistence
+	- Coordinates DataStore operations with in-memory cache
+	- Implements auto-save system with configurable intervals
+	- Integrates cross-server messaging for statistic updates
+	- Provides public API for statistic operations (get, set, increment)
+	- Handles graceful shutdown with data save
+
+	Returns: Module table with functions:
+	- GetOrCreatePlayerStatisticsData(userId) - Loads/creates player stats
+	- UpdatePlayerStatisticAndPublishChanges(userId, stat, amount, isAbsolute, isRemote?) - Updates stat
+	- IncrementPlayerStatistic(userId, stat, amount, isRemote?) - Increments stat
+	- SetPlayerStatisticAbsoluteValue(userId, stat, value, isRemote?) - Sets stat
+	- GetPlayerStatisticValue(userId, stat) - Gets stat value
+	- CachePlayerStatisticsDataInMemory(userId) - Preloads data to cache
+	- RemovePlayerDataFromCacheAndSave(userId) - Saves and removes from cache
+	- SaveAllCachedData() - Saves all cached data
+
+	Usage:
+	local PlayerData = require(Modules.Managers.PlayerData)
+	PlayerData:IncrementPlayerStatistic(player.UserId, "Donated", 100)
+	local raised = PlayerData:GetPlayerStatisticValue(player.UserId, "Raised")
+]]
+
 --------------
 -- Services --
 
@@ -10,13 +37,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 
 local ResourceCleanup = require(modules.Wrappers.ResourceCleanup)
-local DataCache = require(script:WaitForChild("DataCache"))
-local DataStore = require(script:WaitForChild("DataStore"))
-local CrossServerMessaging = require(script:WaitForChild("CrossServerMessaging"))
-local StatisticsAPI = require(script:WaitForChild("StatisticsAPI"))
+local DataCache = assert(script:WaitForChild("DataCache", 10), "DataCache module not found")
+local DataStore = assert(script:WaitForChild("DataStore", 10), "DataStore module not found")
+local CrossServerMessaging = assert(script:WaitForChild("CrossServerMessaging", 10), "CrossServerMessaging module not found")
+local StatisticsAPI = assert(script:WaitForChild("StatisticsAPI", 10), "StatisticsAPI module not found")
 
 -----------
 -- Types --
@@ -134,6 +161,7 @@ end
 function PlayerStatisticsDataStoreManager:GetOrCreatePlayerStatisticsData(
 	playerUserId: number | string
 ): PlayerStatistics
+	assert(playerUserId ~= nil, "playerUserId cannot be nil")
 	local playerUserIdString: string = tostring(playerUserId)
 	return DataStore.loadPlayerStatistics(playerUserIdString)
 end
@@ -151,6 +179,11 @@ function PlayerStatisticsDataStoreManager:UpdatePlayerStatisticAndPublishChanges
 	shouldSetAbsoluteValue: boolean,
 	isRemoteUpdate: boolean?
 ): ()
+	assert(playerUserId ~= nil, "playerUserId cannot be nil")
+	assert(typeof(statisticName) == "string" and #statisticName > 0, "statisticName must be a non-empty string")
+	assert(typeof(statisticAmount) == "number", "statisticAmount must be a number")
+	assert(typeof(shouldSetAbsoluteValue) == "boolean", "shouldSetAbsoluteValue must be a boolean")
+
 	StatisticsAPI.updatePlayerStatistic(
 		playerUserId,
 		statisticName,

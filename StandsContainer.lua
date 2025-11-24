@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	StandsContainer Script
+
+	Client-side stand UI management and display.
+	Handles stand UI creation, button setup, and purchase flows.
+
+	Returns: Nothing (client-side script)
+
+	Usage: Runs automatically when placed in game
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,33 +23,33 @@ local SoundService = game:GetService("SoundService")
 -- References --
 ----------------
 
-local network: Folder = ReplicatedStorage:WaitForChild("Network") :: Folder
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local unclaimStand = remoteEvents:WaitForChild("UnclaimStand")
-local refreshStand = remoteEvents:WaitForChild("RefreshStand")
-local sendNotificationEvent = bindableEvents:WaitForChild("CreateNotification")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network") :: Folder
+local bindables = assert(network:WaitForChild("Bindables", 10), "Failed to find Bindables")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Failed to find bindable Events")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find remote Events")
+local unclaimStand = assert(remoteEvents:WaitForChild("UnclaimStand", 10), "Failed to find UnclaimStand")
+local refreshStand = assert(remoteEvents:WaitForChild("RefreshStand", 10), "Failed to find RefreshStand")
+local sendNotificationEvent = assert(bindableEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
 
-local GamepassCacheManager = require(Modules.Caches.PassCache)
-local ButtonWrapper = require(Modules.Wrappers.Buttons)
-local PurchaseWrapper = require(Modules.Wrappers.Purchases)
-local NotificationHelper = require(Modules.Utilities.NotificationHelper)
-local InputCategorizer = require(Modules.Utilities.InputCategorizer)
-local FormatString = require(Modules.Utilities.FormatString)
-local GameConfig = require(Configuration.GameConfig)
+local GamepassCacheManager = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("PassCache", 10), "Failed to find PassCache"))
+local ButtonWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("Buttons", 10), "Failed to find Buttons"))
+local PurchaseWrapper = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("Purchases", 10), "Failed to find Purchases"))
+local NotificationHelper = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("NotificationHelper", 10), "Failed to find NotificationHelper"))
+local InputCategorizer = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("InputCategorizer", 10), "Failed to find InputCategorizer"))
+local FormatString = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("FormatString", 10), "Failed to find FormatString"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs = instances:WaitForChild("GuiPrefabs")
-local standUIPrefab = guiPrefabs:WaitForChild("StandUIPrefab")
-local passButtonPrefab = guiPrefabs:WaitForChild("PassButtonPrefab")
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Failed to find Instances")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "Failed to find GuiPrefabs")
+local standUIPrefab = assert(guiPrefabs:WaitForChild("StandUIPrefab", 10), "Failed to find StandUIPrefab")
+local passButtonPrefab = assert(guiPrefabs:WaitForChild("PassButtonPrefab", 10), "Failed to find PassButtonPrefab")
 
-local uiSounds = SoundService:WaitForChild("UI")
-local feedbackSounds = SoundService:WaitForChild("Feedback")
+local uiSounds = assert(SoundService:WaitForChild("UI", 10), "Failed to find UI sounds")
+local feedbackSounds = assert(SoundService:WaitForChild("Feedback", 10), "Failed to find Feedback sounds")
 
 ---------------
 -- Variables --

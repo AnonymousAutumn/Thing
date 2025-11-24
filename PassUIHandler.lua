@@ -1,5 +1,23 @@
 --!strict
 
+--[[
+	PassUIHandler - Main coordinator for gamepass donation UI system
+
+	What it does:
+	- Manages the donation UI lifecycle (open, close, refresh)
+	- Coordinates viewing modes (own passes, other players' passes, gifting)
+	- Handles UI state, cooldowns, and resource cleanup
+	- Integrates submodules (ComponentBuilder, DisplayRenderer, CooldownManager, etc.)
+
+	Returns: N/A (Event-driven module, no return value)
+
+	Usage:
+	- Automatically initializes on require()
+	- Responds to BindableEvents (ToggleUI, UpdateUI)
+	- Responds to RemoteEvents (ToggleGiftUI)
+	- Cleans up on player removal and game shutdown
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,19 +27,19 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found in Network")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found in Remotes")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Bindables folder not found in Network")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Events folder not found in Bindables")
 
-local highlightEvent = remoteEvents:WaitForChild("CreateHighlight")
-local giftUIEvent = remoteEvents:WaitForChild("ToggleGiftUI")
-local updateUIEvent = bindableEvents:WaitForChild("UpdateUI")
-local ToggleUIEvent = bindableEvents:WaitForChild("ToggleUI")
+local highlightEvent = assert(remoteEvents:WaitForChild("CreateHighlight", 10), "CreateHighlight event not found")
+local giftUIEvent = assert(remoteEvents:WaitForChild("ToggleGiftUI", 10), "ToggleGiftUI event not found")
+local updateUIEvent = assert(bindableEvents:WaitForChild("UpdateUI", 10), "UpdateUI event not found")
+local ToggleUIEvent = assert(bindableEvents:WaitForChild("ToggleUI", 10), "ToggleUI event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local GamepassCacheManager = require(Modules.Caches.PassCache)
 local PassUIUtilities = require(Modules.Utilities.PassUIUtilities)

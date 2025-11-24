@@ -1,10 +1,31 @@
 --!strict
 
+--[[
+	GameUI_StatusAnimator
+
+	Handles visual animations and updates for the game status interface.
+	Manages status bar positioning, text updates, and CoreGui toggling for mobile.
+
+	Returns: Table with animation functions:
+		- showStatusInterface, hideStatusInterface: Animated show/hide
+		- updateStatusText: Updates status label text
+		- setExitButtonVisibility: Shows/hides exit button
+		- getVisiblePosition: Device-aware positioning
+		- toggleCoreGui: Mobile-specific CoreGui management
+
+	Usage:
+		local StatusAnimator = require(script.GameUI_StatusAnimator)
+		StatusAnimator.statusLabel = textLabel
+		StatusAnimator.statusHolder = frame
+		StatusAnimator.showStatusInterface()
+		StatusAnimator.updateStatusText("Your turn!")
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 local GameStateManager = require(script.Parent.GameStateManager)

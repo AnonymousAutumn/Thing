@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	StandMaster Module
+
+	Manages stand claiming, ownership, and state synchronization.
+	Handles gamepass verification and player stand assignments.
+
+	Returns: Nothing (server-side script with initialization)
+
+	Usage: Runs automatically on server, manages all stands in workspace
+]]
+
 -- Services
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,24 +18,24 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
 -- References
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes folder")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events folder")
 
-local unclaimStandEvent = remoteEvents:WaitForChild("UnclaimStand")
-local sendNotificationEvent = remoteEvents:WaitForChild("CreateNotification")
-local refreshStandEvent = remoteEvents:WaitForChild("RefreshStand")
+local unclaimStandEvent = assert(remoteEvents:WaitForChild("UnclaimStand", 10), "Failed to find UnclaimStand event")
+local sendNotificationEvent = assert(remoteEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification event")
+local refreshStandEvent = assert(remoteEvents:WaitForChild("RefreshStand", 10), "Failed to find RefreshStand event")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration folder")
 
-local Claimer = require(script.Claimer)
-local GamepassCacheManager = require(Modules.Caches.PassCache)
-local StandManager = require(Modules.Managers.Stands)
-local GameConfig = require(Configuration.GameConfig)
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
-local EnhancedValidation = require(Modules.Utilities.EnhancedValidation)
-local RateLimiter = require(Modules.Utilities.RateLimiter)
+local Claimer = require(assert(script:WaitForChild("Claimer", 10), "Failed to find Claimer module"))
+local GamepassCacheManager = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("PassCache", 10), "Failed to find PassCache"))
+local StandManager = require(assert(Modules:WaitForChild("Managers", 10):WaitForChild("Stands", 10), "Failed to find Stands manager"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
+local EnhancedValidation = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("EnhancedValidation", 10), "Failed to find EnhancedValidation"))
+local RateLimiter = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("RateLimiter", 10), "Failed to find RateLimiter"))
 
 -- Stand tracking
 local StandObjects = {}        -- [Model] = StandModule
@@ -58,6 +69,9 @@ local StandMaster = {}
 	@param standObj StandModule - The stand object being claimed
 ]]
 function StandMaster:TryClaimStand(player, standObj)
+	assert(player, "Player is required for stand claiming")
+	assert(standObj, "Stand object is required for claiming")
+
 	if PlayerToStand[player.Name] then return end
 
 	local playerPassData = GamepassCacheManager.GetPlayerCachedGamepassData(player)

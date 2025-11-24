@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	Music Handler - Scroll Animator
+
+	Manages scrolling text animations for the music player track name display.
+	Handles three display states: buffering (centered), text-fits (left-aligned),
+	and overflowing text (scrolling animation).
+
+	Returns: ScrollAnimator (module table with animation functions)
+
+	Usage:
+		ScrollAnimator.animateTrackNameScroll(trackLabel, trackFrame, scrollState, config)
+		ScrollAnimator.cleanupScrollAnimations(scrollState)
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,7 +22,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
 local TweenHelper = require(Modules.Utilities.TweenHelper)
 
 -----------

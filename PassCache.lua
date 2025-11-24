@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	Player Gamepass Data Cache Manager
+
+	Manages caching of player gamepass and game ownership data to reduce API calls.
+	Handles cache loading, reloading, lifecycle management, and temporary gift recipient
+	caching. Includes automatic cleanup of stale entries and statistics tracking.
+
+	Returns: InventoryHandler (module table with cache management functions)
+
+	Usage:
+		InventoryHandler.LoadPlayerGamepassDataIntoCache(player)
+		local data = InventoryHandler.GetPlayerCachedGamepassData(player)
+		InventoryHandler.ReloadPlayerGamepassDataCache(player)
+		InventoryHandler.UnloadPlayerDataFromCache(player)
+]]
+
 -----------------
 -- Initializer --
 -----------------
@@ -17,8 +33,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local passesLoader = require(modules.Managers.PassesLoader)
 local ResourceCleanup = require(modules.Wrappers.ResourceCleanup)
@@ -106,6 +122,7 @@ DataLoader.initialize({
 --------------------
 
 function InventoryHandler.LoadPlayerGamepassDataIntoCache(targetPlayer: Player): boolean
+	assert(targetPlayer, "targetPlayer cannot be nil")
 	if not validationUtils.isValidPlayer(targetPlayer) then
 		warnlog("Attempted to load cache for invalid player: %s", tostring(targetPlayer))
 		return false
@@ -143,6 +160,8 @@ function InventoryHandler.LoadPlayerGamepassDataIntoCache(targetPlayer: Player):
 end
 
 function InventoryHandler.LoadGiftRecipientGamepassDataTemporarily(recipientUserId: number): PlayerDataCacheEntry?
+	assert(recipientUserId, "recipientUserId cannot be nil")
+	assert(type(recipientUserId) == "number", "recipientUserId must be a number")
 	if not validationUtils.isValidUserId(recipientUserId) then
 		warnlog("Invalid recipient user ID: %s", tostring(recipientUserId))
 		return nil
@@ -181,6 +200,7 @@ function InventoryHandler.LoadGiftRecipientGamepassDataTemporarily(recipientUser
 end
 
 function InventoryHandler.ReloadPlayerGamepassDataCache(targetPlayer: Player): boolean
+	assert(targetPlayer, "targetPlayer cannot be nil")
 	if not validationUtils.isValidPlayer(targetPlayer) then
 		warnlog("Attempted to reload cache for invalid player: %s", tostring(targetPlayer))
 		return false
@@ -236,6 +256,7 @@ function InventoryHandler.UnloadPlayerDataFromCache(targetPlayer: Player): ()
 end
 
 function InventoryHandler.GetPlayerCachedGamepassData(targetPlayer: Player): PlayerDataCacheEntry?
+	assert(targetPlayer, "targetPlayer cannot be nil")
 	if not validationUtils.isValidPlayer(targetPlayer) then
 		warnlog("Attempted to get cache for invalid player: %s", tostring(targetPlayer))
 		return nil

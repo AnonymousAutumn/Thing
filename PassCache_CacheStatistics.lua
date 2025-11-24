@@ -1,5 +1,19 @@
 --!strict
 
+--[[
+	PassCache - Cache Statistics
+
+	Gathers and reports statistics about cache entries including total entries,
+	oldest/newest entry ages, and temporary cache counts. Used for monitoring
+	and debugging cache performance.
+
+	Returns: CacheStatistics (module table with statistics functions)
+
+	Usage:
+		local stats = CacheStatistics.gather(playerCache, tempCache)
+		-- stats.totalEntries, stats.oldestEntry, stats.newestEntry, stats.temporaryEntries
+]]
+
 local CacheStatistics = {}
 
 -----------
@@ -34,6 +48,9 @@ function CacheStatistics.gather(
 	playerCache: { [Player]: PlayerDataCacheEntry },
 	temporaryCache: { [number]: PlayerDataCacheEntry }
 ): CacheStatistics
+	assert(playerCache, "playerCache cannot be nil")
+	assert(temporaryCache, "temporaryCache cannot be nil")
+
 	local totalEntries = 0
 	local oldestEntry: number? = nil
 	local newestEntry: number? = nil

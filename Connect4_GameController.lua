@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	Connect4GameController Module
+
+	Manages individual Connect4 game board state, player interactions, win detection, and turn management.
+	Returns a table with .new() constructor for creating game board controllers.
+
+	Usage:
+		local controller = Connect4GameController.new(boardModel)
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,14 +21,14 @@ local RunService = game:GetService("RunService")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network") :: Folder
-local bindables = network:WaitForChild("Bindables")
-local remotes = network:WaitForChild("Remotes")
-local connect4Bindables = bindables:WaitForChild("Connect4")
-local connect4Remotes = remotes:WaitForChild("Connect4")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found") :: Folder
+local bindables = assert(network:WaitForChild("Bindables", 10), "Bindables folder not found")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found")
+local connect4Bindables = assert(bindables:WaitForChild("Connect4", 10), "Connect4 bindables not found")
+local connect4Remotes = assert(remotes:WaitForChild("Connect4", 10), "Connect4 remotes not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found")
 
 local PlayerData = require(Modules.Managers.PlayerData)
 local DataStoreWrapper = require(Modules.Wrappers.DataStore)
@@ -105,15 +115,18 @@ local Connect4GameBoard = {}
 Connect4GameBoard.__index = Connect4GameBoard
 
 function Connect4GameBoard.new(boardModel: Model): GameBoard
+	assert(boardModel and boardModel:IsA("Model"), "boardModel must be a valid Model")
+
 	local self = setmetatable({}, Connect4GameBoard) :: any
 
 	self.boardModel = boardModel
-	self.tokenContainer = boardModel:WaitForChild("Tokens")
-	self.basePlateYPosition = boardModel:WaitForChild("Base").Position.Y
-	self.gameObjectHolder = boardModel:WaitForChild("ObjectHolder")
-	self.columnTriggers = boardModel:WaitForChild("Triggers")
-	self.joinGamePrompt = self.gameObjectHolder:WaitForChild("ProximityPrompt")
-	self.gameCameraPart = boardModel:WaitForChild("CameraPart")
+	self.tokenContainer = assert(boardModel:WaitForChild("Tokens", 10), "Tokens container not found in board model")
+	local basePart = assert(boardModel:WaitForChild("Base", 10), "Base part not found in board model")
+	self.basePlateYPosition = basePart.Position.Y
+	self.gameObjectHolder = assert(boardModel:WaitForChild("ObjectHolder", 10), "ObjectHolder not found in board model")
+	self.columnTriggers = assert(boardModel:WaitForChild("Triggers", 10), "Triggers folder not found in board model")
+	self.joinGamePrompt = assert(self.gameObjectHolder:WaitForChild("ProximityPrompt", 10), "ProximityPrompt not found")
+	self.gameCameraPart = assert(boardModel:WaitForChild("CameraPart", 10), "CameraPart not found in board model")
 
 	self.columnTriggerPositions = {}
 	self.currentGamePlayers = {}
@@ -205,7 +218,7 @@ function Connect4GameBoard:_connectEvents(): ()
 
 	Players.PlayerAdded:Connect(function(player)
 		player.CharacterAdded:Connect(function(character)
-			local humanoid = character:WaitForChild("Humanoid")
+			local humanoid = assert(character:WaitForChild("Humanoid", 10), "Humanoid not found in character")
 			humanoid.Died:Connect(function()
 				self:_handlePlayerLeaving(player)
 			end)

@@ -1,5 +1,26 @@
 --!strict
 
+--[[
+	PlayerData_DataStore - DataStore operations with retry logic and validation
+
+	What it does:
+	- Saves player statistics to DataStore using UpdateAsync (prevents data loss)
+	- Loads player statistics from DataStore with retry and fallback to defaults
+	- Validates and sanitizes all data from DataStore (prevents corrupt data)
+	- Implements exponential backoff retry logic for DataStore operations
+	- Uses UpdateAsync merge strategy to prevent stat rollback exploits
+	- Handles concurrent writes safely (multi-server scenarios)
+
+	Returns: Module table with functions:
+	- savePlayerStatistics(userId, data) - Saves statistics (returns success boolean)
+	- loadPlayerStatistics(userId) - Loads statistics (returns PlayerStatistics)
+
+	Usage:
+	local DataStore = require(script.DataStore)
+	local success = DataStore.savePlayerStatistics(userId, statsData)
+	local loadedData = DataStore.loadPlayerStatistics(userId)
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,8 +32,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local DataStoreWrapper = require(modules.Wrappers.DataStore)
 local ValidationUtils = require(modules.Utilities.ValidationUtils)
@@ -88,6 +109,9 @@ end
 -- DataStore Operations --
 -------------------------
 function DataStore.savePlayerStatistics(playerUserId: string, playerStatisticsData: PlayerStatistics): boolean
+	assert(typeof(playerUserId) == "string" and #playerUserId > 0, "playerUserId must be a non-empty string")
+	assert(typeof(playerStatisticsData) == "table", "playerStatisticsData must be a table")
+
 	-- SECURITY: Use UpdateAsync to prevent data loss from concurrent writes
 	-- SetAsync would overwrite all data; UpdateAsync merges changes safely
 	local result = DataStoreWrapper.updateAsync(
@@ -131,6 +155,8 @@ function DataStore.savePlayerStatistics(playerUserId: string, playerStatisticsDa
 end
 
 function DataStore.loadPlayerStatistics(playerUserId: string): PlayerStatistics
+	assert(typeof(playerUserId) == "string" and #playerUserId > 0, "playerUserId must be a non-empty string")
+
 	local result = DataStoreWrapper.getAsync(
 		playerStatisticsDataStore,
 		playerUserId,

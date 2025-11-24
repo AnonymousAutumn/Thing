@@ -1,26 +1,50 @@
 --!strict
 
+--[[
+	LeaderboardUI - Main leaderboard system controller
+
+	This module manages client-side leaderboard displays:
+	- Initializes multiple leaderboard instances
+	- Coordinates state management, UI, and updates
+	- Handles retry logic for failed initializations
+	- Manages cleanup on player/script removal
+
+	Returns: Nothing (initializes and runs automatically)
+
+	Usage: This script runs automatically when parented to the player's UI.
+	Automatically discovers and initializes all SurfaceGui leaderboards.
+]]
+
 --------------
 -- Services --
 --------------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+--------------
+-- Constants --
+--------------
+local TAG = "[LeaderboardUI]"
+local WAIT_TIMEOUT = 10
+local MAX_INIT_RETRIES = 3
+local INIT_RETRY_DELAY = 2
+
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
-local leaderboardDisplayHandler = require(script.RigCreator)
+local leaderboardDisplayHandler = require(assert(script:WaitForChild("RigCreator", WAIT_TIMEOUT), TAG .. " RigCreator not found"))
 
 local currentLeaderboardScript = script.Parent
 local localPlayer = Players.LocalPlayer
+assert(localPlayer, TAG .. " LocalPlayer not found")
 
 -- Submodules
-local StateManager = require(script.StateManager)
-local ComponentFinder = require(script.ComponentFinder)
-local UIController = require(script.UIController)
-local UpdateHandler = require(script.UpdateHandler)
+local StateManager = require(assert(script:WaitForChild("StateManager", WAIT_TIMEOUT), TAG .. " StateManager not found"))
+local ComponentFinder = require(assert(script:WaitForChild("ComponentFinder", WAIT_TIMEOUT), TAG .. " ComponentFinder not found"))
+local UIController = require(assert(script:WaitForChild("UIController", WAIT_TIMEOUT), TAG .. " UIController not found"))
+local UpdateHandler = require(assert(script:WaitForChild("UpdateHandler", WAIT_TIMEOUT), TAG .. " UpdateHandler not found"))
 
 -----------
 -- Types --
@@ -28,12 +52,6 @@ local UpdateHandler = require(script.UpdateHandler)
 export type LeaderboardHandler = StateManager.LeaderboardHandler
 export type LeaderboardState = StateManager.LeaderboardState
 export type WorkspaceComponents = ComponentFinder.WorkspaceComponents
-
---------------
--- Constants --
---------------
-local MAX_INIT_RETRIES = 3
-local INIT_RETRY_DELAY = 2
 
 ---------------
 -- Variables --
@@ -55,12 +73,15 @@ end
 -- Initialization Logic --
 ------------------------
 local function performLeaderboardInitialization(leaderboardSurfaceGui: SurfaceGui, state: LeaderboardState): boolean
+	assert(leaderboardSurfaceGui, "performLeaderboardInitialization: leaderboardSurfaceGui is required")
+	assert(state, "performLeaderboardInitialization: state is required")
+
 	local leaderboardName = leaderboardSurfaceGui.Name
 
 	-- Create handler
 	local clientLeaderboardHandler = leaderboardDisplayHandler.new(leaderboardSurfaceGui)
 	if not clientLeaderboardHandler then
-		warn("Failed to create handler for", leaderboardName)
+		warn(TAG .. " Failed to create handler for " .. leaderboardName)
 		return false
 	end
 	state.handler = clientLeaderboardHandler
@@ -68,14 +89,14 @@ local function performLeaderboardInitialization(leaderboardSurfaceGui: SurfaceGu
 	-- Get workspace components
 	local workspaceComponents = ComponentFinder.getWorkspaceComponents(leaderboardName)
 	if not workspaceComponents then
-		warn("Failed to get workspace components for", leaderboardName)
+		warn(TAG .. " Failed to get workspace components for " .. leaderboardName)
 		return false
 	end
 
 	-- Get update remote event
 	local leaderboardUpdateRemoteEvent = ComponentFinder.getUpdateRemoteEvent(leaderboardName)
 	if not leaderboardUpdateRemoteEvent then
-		warn("Failed to get update remote event for", leaderboardName)
+		warn(TAG .. " Failed to get update remote event for " .. leaderboardName)
 		return false
 	end
 
@@ -86,7 +107,7 @@ local function performLeaderboardInitialization(leaderboardSurfaceGui: SurfaceGu
 		clientLeaderboardHandler,
 		state
 		) then
-		warn("Failed to setup toggle for", leaderboardName)
+		warn(TAG .. " Failed to setup toggle for " .. leaderboardName)
 		return false
 	end
 
@@ -97,7 +118,7 @@ local function performLeaderboardInitialization(leaderboardSurfaceGui: SurfaceGu
 		state,
 		StateManager.updateState
 		) then
-		warn("Failed to setup updates for", leaderboardName)
+		warn(TAG .. " Failed to setup updates for " .. leaderboardName)
 		return false
 	end
 

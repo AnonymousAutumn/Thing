@@ -1,5 +1,24 @@
 --!strict
 
+--[[
+	LeaderboardUI_UIController - UI interaction controller for leaderboards
+
+	This module manages leaderboard UI interactions:
+	- Sets up toggle button functionality
+	- Manages visibility of leaderboard entries
+	- Controls transparency states for leaderboard displays
+
+	Returns: UIController module with UI setup functions
+
+	Usage:
+		UIController.setupToggle(
+			toggleButton,
+			scrollingFrame,
+			clientHandler,
+			state
+		)
+]]
+
 -----------
 -- Types --
 -----------
@@ -20,6 +39,7 @@ type LeaderboardState = {
 --------------
 -- Constants --
 --------------
+local TAG = "[LeaderboardUI_UIController]"
 local LEADERBOARD_TRANSPARENCY = {
 	VISIBLE = 0.85,
 	HIDDEN = 0,
@@ -63,9 +83,10 @@ function UIController.setupToggle(
 	clientHandler: LeaderboardHandler,
 	state: LeaderboardState
 ): boolean
-	if not toggleButton or not scrollingFrame or not clientHandler or not state then
-		return false
-	end
+	assert(toggleButton, "UIController.setupToggle: toggleButton is required")
+	assert(scrollingFrame, "UIController.setupToggle: scrollingFrame is required")
+	assert(clientHandler, "UIController.setupToggle: clientHandler is required")
+	assert(state, "UIController.setupToggle: state is required")
 
 	return safeExecute(function()
 		local toggleConnection = toggleButton.MouseButton1Click:Connect(function()

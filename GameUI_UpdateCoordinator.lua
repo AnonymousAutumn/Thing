@@ -1,7 +1,26 @@
 --!strict
 
+--[[
+	GameUI_UpdateCoordinator
+
+	Coordinates game UI updates with validation, auto-hide scheduling, and game-ending detection.
+	Main handler for RemoteEvent UI update messages.
+
+	Returns: Table with update coordination functions:
+		- handleGameUIUpdate: Main entry point for UI updates
+		- validateTurnUpdateParams: Input validation
+		- displayStatusIfChanged: Shows status if different from previous
+		- scheduleAutoHide, cancelAutoHideTask: Auto-hide management
+		- isGameEndingMessage: Detects game-over conditions
+		- setIgnoreUpdatesPeriod, shouldIgnoreUpdates: Update throttling
+
+	Usage:
+		local UpdateCoordinator = require(script.GameUI_UpdateCoordinator)
+		remoteEvent.OnClientEvent:Connect(UpdateCoordinator.handleGameUIUpdate)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
 local GameStateManager = require(script.Parent.GameStateManager)

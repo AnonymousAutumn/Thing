@@ -1,8 +1,21 @@
 --!strict
 
+--[[
+	Stats Populater ColorStyler Module
+
+	Handles color styling for leaderboard entries.
+	Applies rank-based colors and alternating row colors.
+
+	Returns: ColorStyler table with styling functions
+
+	Usage:
+		local ColorStyler = require(...)
+		ColorStyler.applyStrokeToLabels(labels, color)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
 
 local ColorStyler = {}
 

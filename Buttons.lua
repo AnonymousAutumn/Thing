@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	UIButtonHandler Module
+
+	Provides button interaction setup with device-aware event handling (touch/mouse).
+	Returns a table with setupButton, setupButtons, setupAllButtons, and device detection methods.
+
+	Usage:
+		UIButtonHandler.initialize(inputCategorizer)
+		UIButtonHandler.setupButton({ button = myButton, onClick = callback })
+]]
+
 -----------
 -- Types --
 -----------
@@ -10,7 +21,7 @@ export type ButtonConfig = {
 		hover: Sound?,
 		click: Sound?,
 	}?,
-	connectionTracker: any?, -- ConnectionManager instance
+	connectionTracker: { track: (self: any, connection: RBXScriptConnection) -> () }?,
 }
 
 ---------------
@@ -77,6 +88,10 @@ local UIButtonHandler = {}
 ]]
 function UIButtonHandler.initialize(inputCategorizer: any?): ()
 	if inputCategorizer then
+		assert(
+			type(inputCategorizer.getLastInputCategory) == "function",
+			"inputCategorizer must have a getLastInputCategory method"
+		)
 		inputCategorizerModule = inputCategorizer
 		isUserOnTouchDevice = inputCategorizer.getLastInputCategory() == "Touch"
 	end
@@ -88,9 +103,8 @@ end
 	@param config - Button configuration
 ]]
 function UIButtonHandler.setupButton(config: ButtonConfig): ()
-	if not config.button or not config.button:IsA("TextButton") then
-		return
-	end
+	assert(config.button, "ButtonConfig.button is required")
+	assert(config.button:IsA("TextButton"), "ButtonConfig.button must be a TextButton")
 
 	local hoverSound = config.sounds and config.sounds.hover
 	local clickSound = config.sounds and config.sounds.click

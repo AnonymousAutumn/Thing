@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	TransactionHandler DonationMessaging Module
+
+	Handles MessagingService broadcasts for cross-server donation notifications.
+	Manages large donation announcements across all game servers.
+
+	Returns: DonationMessaging table with messaging functions
+
+	Usage:
+		local DonationMessaging = require(...)
+		DonationMessaging.broadcastToMessagingService(topic, data)
+]]
+
 --------------
 -- Services --
 --------------
@@ -11,14 +24,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events")
 
-local sendMessageEvent = remoteEvents:WaitForChild("SendMessage")
+local sendMessageEvent = assert(remoteEvents:WaitForChild("SendMessage", 10), "Failed to find SendMessage")
 
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
-local GameConfig = require(Configuration.GameConfig)
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
 -----------
 -- Types --

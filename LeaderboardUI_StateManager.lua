@@ -1,10 +1,38 @@
 --!strict
 
+--[[
+	LeaderboardUI_StateManager - State management for leaderboard system
+
+	This module manages state for multiple leaderboards:
+	- Initializes and tracks state per leaderboard
+	- Manages resource cleanup for each leaderboard
+	- Handles state updates and tracking
+	- Provides cleanup utilities
+
+	Returns: StateManager module with state management functions
+
+	Usage:
+		local state = StateManager.initializeState("LeaderboardName")
+		StateManager.updateState(state)
+		StateManager.cleanup("LeaderboardName")
+		StateManager.cleanupAll()
+]]
+
+--------------
+-- Services --
+--------------
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+---------------
+-- Constants --
+---------------
+local TAG = "[LeaderboardUI_StateManager]"
+local WAIT_TIMEOUT = 10
+
 ----------------
 -- References --
 ----------------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", WAIT_TIMEOUT), TAG .. " Modules folder not found")
 local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
 
 -----------
@@ -49,6 +77,9 @@ end
 -- Public API --
 ------------------
 function StateManager.initializeState(leaderboardName: string): LeaderboardState
+	assert(typeof(leaderboardName) == "string", "StateManager.initializeState: leaderboardName must be a string")
+	assert(leaderboardName ~= "", "StateManager.initializeState: leaderboardName cannot be empty")
+
 	if not leaderboardStates[leaderboardName] then
 		leaderboardStates[leaderboardName] = {
 			handler = nil,
@@ -62,10 +93,13 @@ function StateManager.initializeState(leaderboardName: string): LeaderboardState
 end
 
 function StateManager.getState(leaderboardName: string): LeaderboardState?
+	assert(typeof(leaderboardName) == "string", "StateManager.getState: leaderboardName must be a string")
 	return leaderboardStates[leaderboardName]
 end
 
 function StateManager.cleanup(leaderboardName: string): ()
+	assert(typeof(leaderboardName) == "string", "StateManager.cleanup: leaderboardName must be a string")
+
 	local state = leaderboardStates[leaderboardName]
 	if not state then
 		return
@@ -88,6 +122,8 @@ function StateManager.cleanupAll(): ()
 end
 
 function StateManager.updateState(state: LeaderboardState): ()
+	assert(state, "StateManager.updateState: state is required")
+
 	state.updateCount = state.updateCount + 1
 	state.lastUpdateTime = os.time()
 end

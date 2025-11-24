@@ -1,8 +1,21 @@
 --!strict
 
+--[[
+	Stats Populater FrameValidator Module
+
+	Validates leaderboard frame structure and child elements.
+	Ensures UI elements exist before manipulation.
+
+	Returns: FrameValidator table with validation functions
+
+	Usage:
+		local FrameValidator = require(...)
+		if FrameValidator.validateStructure(frame) then ... end
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
 
 local FrameValidator = {}
 

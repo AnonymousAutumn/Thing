@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	CameraController Module
+
+	Manages camera updates for Connect4 players during gameplay.
+	Returns a table with camera control methods.
+
+	Usage:
+		CameraController.updatePlayerCamera(player, true, cameraCFrame)
+		CameraController.resetAllCameras(players)
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,9 +19,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network") :: Folder
-local remotes = network:WaitForChild("Remotes")
-local connect4Remotes = remotes:WaitForChild("Connect4")
+local network: Folder = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found") :: Folder
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found")
+local connect4Remotes = assert(remotes:WaitForChild("Connect4", 10), "Connect4 remotes not found")
 
 -----------
 -- Module --

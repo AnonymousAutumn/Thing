@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	ToolManager Module
+
+	Manages tool distribution and removal for combat system.
+	Returns a table with giveToolToPlayer and removeToolFromPlayer methods.
+
+	Usage:
+		ToolManager.giveToolToPlayer(player, getHumanoidFunc)
+		ToolManager.removeToolFromPlayer(player)
+]]
+
 --------------
 -- Services --
 --------------
@@ -8,12 +19,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local tools = instances:WaitForChild("Tools")
-local swordPrefab = tools:WaitForChild("ClassicSword")
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Instances folder not found")
+local tools = assert(instances:WaitForChild("Tools", 10), "Tools folder not found")
+local swordPrefab = assert(tools:WaitForChild("ClassicSword", 10), "ClassicSword tool not found")
 
 ---------------
 -- Constants --

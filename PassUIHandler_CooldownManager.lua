@@ -1,5 +1,25 @@
 --!strict
 
+--[[
+	PassUIHandler_CooldownManager - Manages refresh button cooldowns for gamepass UI
+
+	What it does:
+	- Implements cooldown timer for gamepass data refresh operations
+	- Manages refresh button visibility and timer label updates
+	- Prevents refresh spam and coordinates with player state tracking
+	- Handles cooldown thread lifecycle
+
+	Returns: Module table with functions:
+	- activateRefreshCooldownTimer(player, userInterface, isViewingOwnPasses) - Starts cooldown
+	- handleRefreshButtonClick(player, userInterface, viewingData) - Processes refresh request
+	- initializeRefreshButtonBehavior(player, userInterface, viewingData) - Sets up button connection
+
+	Usage:
+	local CooldownManager = require(script.CooldownManager)
+	CooldownManager.playerUIStates = playerUIStates  -- Inject dependencies
+	CooldownManager.activateRefreshCooldownTimer(player, ui, true)
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,14 +29,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local network: Folder = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Remotes folder not found in Network")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Events folder not found in Remotes")
 
-local notificationEvent = remoteEvents:WaitForChild("CreateNotification")
+local notificationEvent = assert(remoteEvents:WaitForChild("CreateNotification", 10), "CreateNotification event not found")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local GamepassCacheManager = require(Modules.Caches.PassCache)
 local StandManager = require(Modules.Managers.Stands)

@@ -1,5 +1,15 @@
 --!strict
 
+--[[
+	CombatHandler Module
+
+	Manages combat zone detection, tool distribution, and player elimination tracking.
+	Returns nothing - executes automatically when required.
+
+	Usage:
+		Automatically runs when character spawns to handle combat interactions.
+]]
+
 --------------
 -- Services --
 --------------
@@ -15,19 +25,19 @@ type CharacterDescendant = BasePart | Humanoid | Accessory | Script | LocalScrip
 -- References --
 ----------------
 local character = script.Parent :: Model
-local humanoid = character:WaitForChild("Humanoid") :: Humanoid
-local player = Players:GetPlayerFromCharacter(character) :: Player
+local humanoid = assert(character:WaitForChild("Humanoid", 10), "Humanoid not found") :: Humanoid
+local player = assert(Players:GetPlayerFromCharacter(character), "Player not found for character") :: Player
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found")
 local ValidationUtils = require(Modules.Utilities.ValidationUtils)
 
-local instances: Folder = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs = instances:WaitForChild("GuiPrefabs")
-local bloxxedUIPrefab = guiPrefabs:WaitForChild("DeathUIPrefab")
+local instances: Folder = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Instances folder not found")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "GuiPrefabs folder not found")
+local bloxxedUIPrefab = assert(guiPrefabs:WaitForChild("DeathUIPrefab", 10), "DeathUIPrefab not found")
 
-local worldFolder: Folder = workspace:WaitForChild("World") :: Folder
-local environmentFolder: Folder = worldFolder:WaitForChild("Environment") :: Folder
-local combatZonePart: BasePart = environmentFolder:WaitForChild("CombatZonePart") :: BasePart
+local worldFolder: Folder = assert(workspace:WaitForChild("World", 10), "World folder not found") :: Folder
+local environmentFolder: Folder = assert(worldFolder:WaitForChild("Environment", 10), "Environment folder not found") :: Folder
+local combatZonePart: BasePart = assert(environmentFolder:WaitForChild("CombatZonePart", 10), "CombatZonePart not found") :: BasePart
 combatZonePart.Transparency = 1
 
 -- Submodules

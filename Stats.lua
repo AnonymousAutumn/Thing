@@ -1,5 +1,16 @@
 --!strict
 
+--[[
+	Stats/Leaderboard System
+
+	Server-side leaderboard management and display system.
+	Fetches data from OrderedDataStores and updates leaderboard UIs.
+
+	Returns: Nothing (server-side initialization script)
+
+	Usage: Runs automatically on server, manages all leaderboards
+]]
+
 --------------
 -- Services --
 --------------
@@ -10,28 +21,28 @@ local Workspace = game:GetService("Workspace")
 ----------------
 -- References --
 ----------------
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local leaderboardRemotes = remotes:WaitForChild("Leaderboards")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes")
+local leaderboardRemotes = assert(remotes:WaitForChild("Leaderboards", 10), "Failed to find Leaderboards")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Configuration = ReplicatedStorage:WaitForChild("Configuration")
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration")
 
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
-local EnhancedValidation = require(Modules.Utilities.EnhancedValidation)
-local GameConfig = require(Configuration.GameConfig)
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
+local EnhancedValidation = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("EnhancedValidation", 10), "Failed to find EnhancedValidation"))
+local GameConfig = require(assert(Configuration:WaitForChild("GameConfig", 10), "Failed to find GameConfig"))
 
 -- Submodules
-local DataFetcher = require(script.DataFetcher)
-local DisplayManager = require(script.DisplayManager)
-local UpdateScheduler = require(script.UpdateScheduler)
-local UIElementFinder = require(script.UIElementFinder)
+local DataFetcher = require(assert(script:WaitForChild("DataFetcher", 10), "Failed to find DataFetcher"))
+local DisplayManager = require(assert(script:WaitForChild("DisplayManager", 10), "Failed to find DisplayManager"))
+local UpdateScheduler = require(assert(script:WaitForChild("UpdateScheduler", 10), "Failed to find UpdateScheduler"))
+local UIElementFinder = require(assert(script:WaitForChild("UIElementFinder", 10), "Failed to find UIElementFinder"))
 
-local instances = ReplicatedStorage:WaitForChild("Instances")
-local guiPrefabs = instances:WaitForChild("GuiPrefabs")
-local leaderboardPrefab = guiPrefabs:WaitForChild("LeaderboardEntryPrefab")
+local instances = assert(ReplicatedStorage:WaitForChild("Instances", 10), "Failed to find Instances")
+local guiPrefabs = assert(instances:WaitForChild("GuiPrefabs", 10), "Failed to find GuiPrefabs")
+local leaderboardPrefab = assert(guiPrefabs:WaitForChild("LeaderboardEntryPrefab", 10), "Failed to find LeaderboardEntryPrefab")
 
-local leaderboardsContainer = Workspace.Leaderboards
+local leaderboardsContainer = assert(Workspace:WaitForChild("Leaderboards", 10), "Failed to find Leaderboards container")
 
 ----------------
 -- Constants --

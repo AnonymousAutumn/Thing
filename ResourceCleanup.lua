@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	ResourceCleanup Module
+
+	Provides resource management utilities for tracking and cleaning up connections,
+	tweens, instances, threads, and callbacks. Prevents memory leaks.
+
+	Returns: ResourceCleanup table with cleanup factory functions
+
+	Usage:
+		local ResourceCleanup = require(...)
+		local manager = ResourceCleanup.new()
+		manager:trackConnection(event:Connect(...))
+		manager:cleanupAll() -- Clean everything on shutdown
+]]
+
 -----------
 -- Types --
 -----------

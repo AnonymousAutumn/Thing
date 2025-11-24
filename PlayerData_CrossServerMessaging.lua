@@ -1,5 +1,28 @@
 --!strict
 
+--[[
+	PlayerData_CrossServerMessaging - Cross-server statistic update synchronization
+
+	What it does:
+	- Subscribes to MessagingService for cross-server leaderboard updates
+	- Publishes statistic updates to other servers
+	- Updates player leaderstats UI when receiving remote updates
+	- Validates cross-server messages before processing
+	- Fires UI update events for "Raised" statistic changes
+
+	Returns: Module table with functions:
+	- publishUpdate(updateMessage) - Publishes update to MessagingService
+	- subscribe(connectionTracker) - Subscribes to cross-server updates
+	- updatePlayerStats(player, stat, value) - Updates player leaderstats
+	- setShutdown(shutdown) - Sets shutdown flag
+	- cleanup() - Disconnects MessagingService connection
+
+	Usage:
+	local CrossServerMessaging = require(script.CrossServerMessaging)
+	CrossServerMessaging.subscribe(trackConnection)
+	CrossServerMessaging.publishUpdate({ UserId = 123, Stat = "Raised", Value = 1000 })
+]]
+
 --------------
 -- Services --
 --------------
@@ -12,12 +35,12 @@ local Players = game:GetService("Players")
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network") :: Folder
-local bindables = network:WaitForChild("Bindables")
-local bindableEvents = bindables:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Network folder not found in ReplicatedStorage")
+local bindables = assert(network:WaitForChild("Bindables", 10), "Bindables folder not found in Network")
+local bindableEvents = assert(bindables:WaitForChild("Events", 10), "Events folder not found in Bindables")
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Modules folder not found in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Configuration folder not found in ReplicatedStorage")
 
 local validationUtils = require(modules.Utilities.ValidationUtils)
 local gameConfig = require(configuration.GameConfig)
@@ -102,6 +125,11 @@ end
 -- Cross-Server Communication --
 -------------------------------
 function CrossServerMessaging.publishUpdate(updateMessage: CrossServerMessage): ()
+	assert(typeof(updateMessage) == "table", "updateMessage must be a table")
+	assert(typeof(updateMessage.UserId) == "number", "updateMessage.UserId must be a number")
+	assert(typeof(updateMessage.Stat) == "string", "updateMessage.Stat must be a string")
+	assert(typeof(updateMessage.Value) == "number", "updateMessage.Value must be a number")
+
 	if isShuttingDown then
 		return
 	end

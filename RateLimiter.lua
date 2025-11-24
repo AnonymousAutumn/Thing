@@ -1,5 +1,20 @@
 --!strict
 
+--[[
+	RateLimiter Module
+
+	Provides rate limiting and cooldown management for player actions.
+	Tracks violations, enforces cooldowns, and logs suspicious activity.
+
+	Returns: RateLimiter table with rate limiting functions
+
+	Usage:
+		local RateLimiter = require(...)
+		if RateLimiter.checkRateLimit(player, "ActionName", 2) then
+			-- Action is allowed
+		end
+]]
+
 --------------
 -- Services --
 --------------
@@ -9,9 +24,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 ----------------
 -- References --
 ----------------
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
 
 -----------
 -- Types --
@@ -176,6 +191,9 @@ end
 --- @param cooldownSeconds number? - Cooldown duration (uses global or default if not provided)
 --- @return boolean - True if action is allowed, false if rate limited
 function RateLimiter.checkRateLimit(player: Player, actionName: string, cooldownSeconds: number?): boolean
+	assert(player, "Player is required for rate limit check")
+	assert(actionName, "Action name is required for rate limit check")
+
 	if not ValidationUtils.isValidPlayer(player) then
 		warnlog("Invalid player for rate limit check")
 		return false

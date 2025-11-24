@@ -1,5 +1,38 @@
 --!strict
 
+--[[
+	PlayerData_DataCache - In-memory cache for player statistics data
+
+	What it does:
+	- Maintains in-memory cache of player statistics with metadata (last accessed, last saved)
+	- Tracks pending save flags for dirty data
+	- Implements automatic cache cleanup based on staleness
+	- Manages save delay handles for debounced saves
+	- Provides cache entry lifecycle management (create, access, remove)
+	- Calls removal callback when entries are evicted (for saving)
+
+	Returns: Module table with functions:
+	- updateMetadata(userId) - Updates access timestamp
+	- updateSaveTime(userId) - Updates save timestamp
+	- removeCacheEntry(userId) - Removes entry and triggers save callback
+	- startCleanupLoop() - Starts periodic cleanup task
+	- stopCleanupLoop() - Stops cleanup task
+	- getCachedData(userId) - Gets cached data
+	- setCachedData(userId, data) - Sets cached data
+	- getAllCachedData() - Gets all cached data
+	- getPendingSaveFlag(userId) / setPendingSaveFlag(userId, value) - Manages dirty flags
+	- getSaveDelayHandle(userId) / setSaveDelayHandle(userId, handle) - Manages delay handles
+	- setShutdown(shutdown) - Sets shutdown flag
+	- setRemovalCallback(callback) - Sets cache removal callback
+	- cleanup() - Stops cleanup and cancels delay handles
+
+	Usage:
+	local DataCache = require(script.DataCache)
+	DataCache.setRemovalCallback(saveFunction)
+	DataCache.setCachedData(userId, statsData)
+	DataCache.startCleanupLoop()
+]]
+
 --------------
 -- Services --
 --------------

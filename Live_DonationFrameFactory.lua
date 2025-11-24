@@ -1,10 +1,24 @@
 --!strict
 
+--[[
+	Donation Frame Factory
+
+	Creates and configures donation display frames with proper styling, animations,
+	and countdown bars for the live donation leaderboard. Handles frame cloning,
+	user avatar/username display, tier-based coloring, and fade-in animations.
+
+	Returns: DonationFrameFactory (module table with factory functions)
+
+	Usage:
+		local frame = DonationFrameFactory.createFrame(prefab, donorId, recipientId, amount, tierInfo, isLarge, trackTween)
+		DonationFrameFactory.setupLargeDonationCountdown(frame, tierInfo, onComplete, trackTween, trackConnection)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local FormatString = require(modules.Utilities.FormatString)
 local UsernameCache = require(modules.Caches.UsernameCache)

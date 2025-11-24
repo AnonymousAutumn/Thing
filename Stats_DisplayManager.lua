@@ -1,8 +1,21 @@
 --!strict
 
+--[[
+	Stats DisplayManager Module
+
+	Manages leaderboard display frame creation and updates.
+	Handles UI frame generation and data population.
+
+	Returns: DisplayManager table with display functions
+
+	Usage:
+		local DisplayManager = require(...)
+		local frames = DisplayManager.createLeaderboardDisplayFrames(parent, count, colors, duration, prefab)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Populater = require(script.Parent.Populater)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local Populater = require(assert(script.Parent:WaitForChild("Populater", 10), "Failed to find Populater"))
 
 ---------------
 -- Constants --

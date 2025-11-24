@@ -1,5 +1,21 @@
 --!strict
 
+--[[
+	GiftUI_BackgroundTasks - Background task management for gift system
+
+	This module manages continuous background tasks for the gift system:
+	- Periodic gift data refresh from server (every 10 seconds)
+	- Time display updates for relative timestamps (every 1 second)
+
+	Returns: BackgroundTasks module with task management functions
+
+	Usage:
+		BackgroundTasks.requestLatestGiftDataCallback = yourFetchFunction
+		BackgroundTasks.updateTimeDisplayCallback = yourUpdateFunction
+		BackgroundTasks.startContinuousGiftDataRefreshLoop(resourceManager)
+		BackgroundTasks.startContinuousTimeDisplayUpdateLoop(resourceManager, giftDisplayFrame)
+]]
+
 ---------------
 -- Constants --
 ---------------
@@ -23,6 +39,8 @@ BackgroundTasks.updateTimeDisplayCallback = nil :: (() -> ())?
 	@param resourceManager any - ResourceCleanup instance to track the task
 ]]
 function BackgroundTasks.startContinuousGiftDataRefreshLoop(resourceManager: any): ()
+	assert(resourceManager, "BackgroundTasks.startContinuousGiftDataRefreshLoop: resourceManager is required")
+
 	local refreshTask = task.spawn(function()
 		while true do
 			task.wait(GIFT_DATA_REFRESH_INTERVAL)
@@ -43,6 +61,9 @@ end
 	@param giftDisplayFrame Frame - The gift display frame to check visibility
 ]]
 function BackgroundTasks.startContinuousTimeDisplayUpdateLoop(resourceManager: any, giftDisplayFrame: Frame): ()
+	assert(resourceManager, "BackgroundTasks.startContinuousTimeDisplayUpdateLoop: resourceManager is required")
+	assert(giftDisplayFrame, "BackgroundTasks.startContinuousTimeDisplayUpdateLoop: giftDisplayFrame is required")
+
 	local updateTask = task.spawn(function()
 		while true do
 			task.wait(TIME_DISPLAY_UPDATE_INTERVAL)

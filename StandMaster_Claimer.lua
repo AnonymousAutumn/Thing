@@ -1,5 +1,18 @@
 --!strict
 
+--[[
+	StandMaster Claimer Module
+
+	Stand instance management for individual stands in the game.
+	Handles claiming, displaying owner info, and resetting stands.
+
+	Returns: StandModule factory (new function)
+
+	Usage:
+		local Claimer = require(...)
+		local standObj = Claimer.new(standModel, master, refreshEvent, claimedStands)
+]]
+
 -----------
 -- Types --
 -----------
@@ -38,16 +51,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- References --
 ----------------
 
-local network = ReplicatedStorage:WaitForChild("Network")
-local remotes = network:WaitForChild("Remotes")
-local remoteEvents = remotes:WaitForChild("Events")
+local network = assert(ReplicatedStorage:WaitForChild("Network", 10), "Failed to find Network in ReplicatedStorage")
+local remotes = assert(network:WaitForChild("Remotes", 10), "Failed to find Remotes folder")
+local remoteEvents = assert(remotes:WaitForChild("Events", 10), "Failed to find Events folder")
 
-local sendNotificationEvent = remoteEvents:WaitForChild("CreateNotification")
+local sendNotificationEvent = assert(remoteEvents:WaitForChild("CreateNotification", 10), "Failed to find CreateNotification event")
 
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ResourceCleanup = require(Modules.Wrappers.ResourceCleanup)
-local GamepassCacheManager = require(Modules.Caches.PassCache)
-local FormatString = require(Modules.Utilities.FormatString)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local ResourceCleanup = require(assert(Modules:WaitForChild("Wrappers", 10):WaitForChild("ResourceCleanup", 10), "Failed to find ResourceCleanup"))
+local GamepassCacheManager = require(assert(Modules:WaitForChild("Caches", 10):WaitForChild("PassCache", 10), "Failed to find PassCache"))
+local FormatString = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("FormatString", 10), "Failed to find FormatString"))
 
 -----------
 -- Module --
@@ -57,6 +70,11 @@ local StandModule = {}
 StandModule.__index = StandModule
 
 function StandModule.new(stand: Model, master: StandMaster, refreshEvent: RemoteEvent, claimedStands: { [Model]: ClaimedStandData }): StandModule
+	assert(stand, "Stand model is required")
+	assert(master, "Stand master is required")
+	assert(refreshEvent, "Refresh event is required")
+	assert(claimedStands, "Claimed stands table is required")
+
 	local self = setmetatable({}, StandModule)
 	self.Stand = stand
 	self.Prompt = stand.PromptHolder.Attachment.ProximityPrompt

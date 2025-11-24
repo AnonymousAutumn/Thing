@@ -1,10 +1,27 @@
 --!strict
 
+--[[
+	Cross-Server Donation Bridge
+
+	Manages cross-server communication for donation notifications using MessagingService.
+	Subscribes to donation events, validates incoming data, and forwards valid notifications
+	to the processing callback.
+
+	Returns: CrossServerBridge (module table with constructor)
+
+	Usage:
+		local bridge = CrossServerBridge.new()
+		bridge:subscribe(function(donationData)
+			-- Process donation notification
+		end)
+		bridge:shutdown() -- When cleaning up
+]]
+
 local MessagingService = game:GetService("MessagingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local modules = ReplicatedStorage:WaitForChild("Modules")
-local configuration = ReplicatedStorage:WaitForChild("Configuration")
+local modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules in ReplicatedStorage")
+local configuration = assert(ReplicatedStorage:WaitForChild("Configuration", 10), "Failed to find Configuration in ReplicatedStorage")
 
 local ValidationUtils = require(modules.Utilities.ValidationUtils)
 local GameConfig = require(configuration.GameConfig)

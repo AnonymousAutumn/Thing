@@ -1,8 +1,21 @@
 --!strict
 
+--[[
+	Stats Populater PlayerRenderer Module
+
+	Renders player information (username, avatar) in leaderboard entries.
+	Handles both real players and Studio test displays.
+
+	Returns: PlayerRenderer table with rendering functions
+
+	Usage:
+		local PlayerRenderer = require(...)
+		PlayerRenderer.setupRealPlayerDisplay(label, image, userId, name, config)
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ValidationUtils = require(Modules.Utilities.ValidationUtils)
+local Modules = assert(ReplicatedStorage:WaitForChild("Modules", 10), "Failed to find Modules")
+local ValidationUtils = require(assert(Modules:WaitForChild("Utilities", 10):WaitForChild("ValidationUtils", 10), "Failed to find ValidationUtils"))
 
 local PlayerRenderer = {}
 

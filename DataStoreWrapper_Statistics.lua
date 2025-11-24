@@ -1,5 +1,24 @@
 --!strict
 
+--[[
+	DataStoreWrapper_Statistics
+
+	Tracks statistics for DataStore operations including successes, failures,
+	retries, and budget waits. Provides metrics for monitoring DataStore health.
+
+	Returns: Table with statistics functions:
+		- increment*: Functions to increment specific counters
+		- get: Returns current statistics snapshot
+		- reset: Resets all statistics to zero
+
+	Usage:
+		local Statistics = require(script.DataStoreWrapper_Statistics)
+		Statistics.incrementTotalOperations()
+		Statistics.incrementSuccessfulOperations()
+		local stats = Statistics.get()
+		print("Success rate:", stats.successfulOperations / stats.totalOperations)
+]]
+
 local Statistics = {}
 
 -----------
